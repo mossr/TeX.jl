@@ -1,0 +1,7 @@
+*.aux
+*.log
+*.pdf
+*.tex
+
+output_*
+test/output_*

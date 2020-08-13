@@ -1,0 +1,4 @@
+name = "TeX"
+uuid = "79ba4951-f1d1-4432-a4f0-9b558427b7c8"
+authors = ["Robert Moss <mossr@cs.stanford.edu>"]
+version = "0.1.0"
