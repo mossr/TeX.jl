@@ -85,7 +85,7 @@ Extending the same example as above, the following Julia code will produce the [
 ```julia
 doc.tufte = true
 doc.jobname = "tufte" # PDF file name
-doc.title = L"Tufte Example"
+doc.title = "Tufte Example"
 doc.author = "Robert Moss"
 doc.email = "mossr@cs.stanford.edu"
 doc.address = "Stanford University, Stanford, CA 94305"

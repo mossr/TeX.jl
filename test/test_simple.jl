@@ -30,7 +30,7 @@ texgenerate(doc; output="output_simple") # Compile the document to PDF
 # Regenerate using the Tufte-style (and adding an author/email/address)
 doc.tufte = true
 doc.jobname = "tufte"
-doc.title = L"Tufte Example"
+doc.title = "Tufte Example"
 doc.author = "Robert Moss"
 doc.email = "mossr@cs.stanford.edu"
 doc.address = "Stanford University, Stanford, CA 94305"

@@ -5,7 +5,7 @@ doc.author = "Robert Moss"
 doc.email = "mossr@cs.stanford.edu"
 doc.address = "Stanford University, Stanford, CA 94305"
 addpackage!(doc, "url")
-addtitle!(doc, L"Tufte Example")
+addtitle!(doc, "Tufte Example")
 
 @tex doc L"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
