@@ -1,8 +1,11 @@
 using TeX
 
-doc = TeXDocument("main")
+doc = TeXDocument("tufte"; tufte=true)
+doc.author = "Robert Moss"
+doc.email = "mossr@cs.stanford.edu"
+doc.address = "Stanford University, Stanford, CA 94305"
 addpackage!(doc, "url")
-addtitle!(doc, L"Simple Example: \texttt{@tex}")
+addtitle!(doc, L"Tufte Example")
 
 @tex doc L"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
@@ -25,13 +28,4 @@ function loss_function(theta, X, y)
     return (J, grad)
 end
 
-texgenerate(doc; output="output_simple") # Compile the document to PDF
-
-# Regenerate using the Tufte-style (and adding an author/email/address)
-doc.tufte = true
-doc.jobname = "tufte"
-doc.title = L"Tufte Example"
-doc.author = "Robert Moss"
-doc.email = "mossr@cs.stanford.edu"
-doc.address = "Stanford University, Stanford, CA 94305"
-texgenerate(doc; output="output_simple_tufte")
+texgenerate(doc; output="output_tufte") # Compile the document to PDF

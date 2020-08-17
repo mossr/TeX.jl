@@ -9,6 +9,8 @@ The tex document will be named after the function (example "algorithm.tex")
 """
 module TeX
 
+using Parameters
+
 export @tex,
        @tex_str,
        @L_str,
@@ -17,6 +19,7 @@ export @tex,
        texgenerate,
        texclear,
        globaldoc,
+       globaltufte,
        add!,
        addpackage!,
        addtitle!
@@ -38,7 +41,21 @@ end
 texclear()
 
 
-function textranslate(tex::TeXDocument)
+function globaltufte(toggle=true)
+    global WORKINGDOC
+    WORKINGDOC.tufte = toggle
+end
+
+
+function textranslate!(tex::TeXDocument)
+    if tex.tufte
+        tex.documentclass = "tufte-writeup"
+        tex.preamble = ""
+    else
+        tex.documentclass = "article"
+        tex.preamble = lstlisting_preamble()
+        length_added_pkgs = add_lstlisting_packages!(tex)
+    end
     str = string("\\documentclass[", tex.documentfontsizept, "pt]{", tex.documentclass, "}\n")
     for p in tex.packages
         op = ""
@@ -46,6 +63,11 @@ function textranslate(tex::TeXDocument)
             op = string("[", p.option, "]")
         end
         str = string(str, "\\usepackage", op, "{", p.name, "}\n")
+    end
+
+    if !tex.tufte
+        # Clear added lstlisting packages
+        tex.packages = tex.packages[1:end-length_added_pkgs]
     end
 
     if length(tex.preamble) > 0
@@ -57,9 +79,19 @@ function textranslate(tex::TeXDocument)
     end
 
     if !isempty(tex.title)
-        str = string(str, "\n\\title{\\vspace{-2.0cm}$(tex.title)}\n")
+        titlespace = tex.tufte ? "" : "\\vspace{-2.0cm}"
+        str = string(str, "\n\\title{$titlespace$(tex.title)}\n")
         str = string(str, "\\date{}\n")
     end
+    if !isempty(tex.author)
+        if tex.tufte
+            str = string(str, "\n\\author{\\name $(tex.author) \\email $(tex.email)\\\\\n")
+            str = string(str, "        \\addr $(tex.address)}\n")
+        else
+            str = string(str, "\n\\author{$(tex.author)}\n")
+        end
+    end
+
 
     str = string(str, "\n\\begin{document}\n")
     if !isempty(tex.title)
@@ -69,38 +101,73 @@ function textranslate(tex::TeXDocument)
         str = string(str, "\\input{", i.name, "}\n")
     end
     str = string(str, "\\end{document}")
+
+
     return str
 end
 
 function texwrite(tex::TeXDocument)
     # writes each input file
-    for i in tex.inputs
-        input = open(abspath(joinpath(tex.build_dir, i.name * ".tex")), "w")
-        if i.needs_section_name
-            write(input, string("\\section{", texformat(i.name), "}\n"))
+    for input in tex.inputs
+        file = open(abspath(joinpath(tex.build_dir, input.name * ".tex")), "w")
+        if input.needs_section_name
+            write(file, string("\\section{", texformat(input.name), "}\n"))
         end
-        write(input, i.body)
-        close(input)
+        write(file, input.body)
+        if !isempty(input.code)
+            if tex.tufte
+                write(file, juliaverbatim(input.code))
+            else
+                write(file, lstlisting(input.code))
+            end
+        end
+        close(file)
     end
 
     # writes the main document
     main = open(tex.jobname * ".tex", "w")
-    write(main, textranslate(tex))
+    write(main, textranslate!(tex))
     close(main)
 end
 
 function texcompile(tex::TeXDocument)
-    filename = tex.jobname * ".tex"
-    cmd = ["pdflatex", "-quiet", abspath(filename)]
-    if tex.build_dir != ""
-        push!(cmd, string("-aux-directory=", abspath(tex.build_dir)))
-        push!(cmd, string("-output-directory=", abspath(tex.build_dir)))
-        include_dir = joinpath(dirname(pathof(TeX)), "include")
-        include_dirs = [dirname(abspath(filename)), include_dir]
-        map(d->push!(cmd,"-include-directory=$d"), include_dirs)
+    if tex.tufte
+        cmd_lualatex = ["lualatex",
+               "-shell-escape",
+               "--aux-directory=output", # TODO: tex.build_dir
+               "--include-directory=$(joinpath(@__DIR__, "../include"))",
+               "--include-directory=output", # TODO: tex.build_dir
+               tex.jobname]
+        @info "Running: $(`$cmd_lualatex`)"
+        run(`$cmd_lualatex`)
+
+        # open compiled pdf before pdflatex
+        if tex.open
+            texopen(tex)
+        end
+
+        cmd_pythontex = ["pythontex",
+                         "output/$(tex.jobname)"]
+        @info "Running: $(`$cmd_pythontex`)"
+        run(`$cmd_pythontex`)
+
+        # TODO: biber --input-directory=tex output/main
+
+        @info "Running: $(`$cmd_lualatex`)"
+        run(`$cmd_lualatex`)
+    else
+        filename = tex.jobname * ".tex"
+        cmd = ["pdflatex", "-quiet", abspath(filename)]
+        if tex.build_dir != ""
+            push!(cmd, string("-aux-directory=", abspath(tex.build_dir)))
+            push!(cmd, string("-output-directory=", abspath(tex.build_dir)))
+            include_dir = joinpath(dirname(pathof(TeX)), "include")
+            include_dirs = [dirname(abspath(filename)), include_dir]
+            map(d->push!(cmd,"-include-directory=$d"), include_dirs)
+        end
+        @info "Running: $(`$cmd`)"
+        run(`$cmd`)
     end
-    @info "Running: $(`$cmd`)"
-    run(`$cmd`)
 end
 
 function texopen(tex::TeXDocument)
@@ -114,7 +181,7 @@ end
 const TeXSections = Array{TeXSection}
 
 function texgenerate(document::TeXDocument; output="output")
-    isdir(output) ? nothing : mkdir(output)
+    isdir(output) ? nothing : mkdir(output) # TODO. document.build_dir
     cd(output) do
         # writes the LaTeX string and function code to a .tex file
         texwrite(document)
@@ -164,10 +231,19 @@ function texformat(str::String; replace_with_spaces::Bool=true, use_title_case::
     return str
 end
 
+# TODO: environment function.
 function lstlisting(code::String)
     str = "\n\\begin{lstlisting}\n"
     str *= code
     str *= "\n\\end{lstlisting}\n"
+end
+
+function juliaverbatim(code::String)
+    str = "\n\\begin{algorithm}\n"
+    str *= "\n\\begin{juliaverbatim}\n"
+    str *= code # TODO: Strip left space
+    str *= "\n\\end{juliaverbatim}\n"
+    str *= "\n\\end{algorithm}\n"
 end
 
 function parse_latex(idx, args...)
@@ -188,7 +264,10 @@ end
 
 function add!(document::TeXDocument, latex_str::String, name_str::String = "", func_str::String = "")
     input = TeXSection(name_str)
-    input.body = string(latex_str, lstlisting(func_str))
+    input.body = latex_str
+    if !isempty(func_str)
+        input.code = func_str
+    end
     push!(document.inputs, input)
 end
 

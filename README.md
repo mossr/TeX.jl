@@ -1,13 +1,40 @@
 # TeX.jl
 `@tex` macro for generating LaTeX PDFs from Julia code with descriptions. Requires `pdflatex`.
+We recommend [MiKTeX](https://miktex.org/download) or [TeX Live](https://www.tug.org/texlive/).
 
-#### Installation
+### Installation
 ```julia
 ] add https://github.com/mossr/TeX.jl
 ```
 
-#### Example:
-The following code will produce [`main.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/main.pdf) shown below.
+#### Tufte-style Installation
+_These steps are only required if you set `TeXDocument(;tufte=true)`._
+This requires `lualatex` and `pythontex`.
+You can download the latest version of pythontex from https://github.com/gpoore/pythontex.
+
+Initialize and update the submodules:
+```
+git submodule init
+git submodule update
+```
+
+Compile the style:
+```
+cd style
+sudo python setup.py install
+cd ..
+```
+
+Compile the lexer:
+```
+cd lexer
+sudo python setup.py install
+cd ..
+```
+
+
+## Example (`pdflatex` and `lstlisting`):
+The following Julia code will produce the [`main.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/main.pdf) file shown below.
 
 ```julia
 using TeX
@@ -40,11 +67,37 @@ end
 texgenerate(doc) # Compile the document to PDF
 ```
 
+The output PDF is generated using `pdflatex`.
+The PDF includes title cased function names as sections with descriptions above the Julia function in a `lstlisting` environment.
+Multiple functions with `@tex` can be used in the same file, see [`test_full.jl`](https://github.com/mossr/TeX.jl/blob/master/test/test_full.jl) for examples.
 
-#### Output PDF:
-The output PDF includes title cased function names as sections with descriptions above the Julia function in a `lstlisting` environment.
-Multiple functions with `@tex` can be used in the same file, see [`test_tex.jl`](https://github.com/mossr/TeX.jl/blob/master/test/test_tex.jl) for examples. 
-
+<kbd>
 <p align="center">
-  <img src="https://github.com/mossr/TeX.jl/blob/master/test/main.svg">
+  <!-- <img src="https://github.com/mossr/TeX.jl/blob/master/test/main.svg"> -->
+  <img src="test/main.svg">
 </p>
+</kbd>
+
+
+
+## Tufte Example (`lualatex` and `pythontex`):
+Extending the same example as above, the following Julia code will produce the [`tufte.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/tufte.pdf) file shown below.
+
+```julia
+doc.tufte = true
+doc.jobname = "tufte" # PDF file name
+doc.title = L"Tufte Example"
+doc.author = "Robert Moss"
+doc.email = "mossr@cs.stanford.edu"
+doc.address = "Stanford University, Stanford, CA 94305"
+texgenerate(doc)
+```
+
+The output PDF uses the `algorithm` and `juliaverbatim` environments with a custom `tufte-writeup.cls`.
+
+<kbd>
+<p align="center">
+  <!-- <img src="https://github.com/mossr/TeX.jl/blob/master/test/tufte.svg"> -->
+  <img src="test/tufte.svg">
+</p>
+</kbd>

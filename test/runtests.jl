@@ -1,26 +1,38 @@
 using Optionals
 using Test
 
-@testset "optional" begin
-    testdir = joinpath(dirname(@__DIR__), "test")
+testdir = joinpath(dirname(@__DIR__), "test")
+cd(testdir) do
+    @testset "tex" begin
 
-    @testset "type" begin
-        @test try
-            include(joinpath(testdir, "test_tex.jl"))
-            true
-        catch err
-            display(err)
-            false
+        @testset "simple" begin
+            @test try
+                include(joinpath(testdir, "test_simple.jl"))
+                true
+            catch err
+                display(err)
+                false
+            end
         end
-    end
 
-    @testset "customers" begin
-        @test try
-            include(joinpath(testdir, "test_simple.jl"))
-            true
-        catch err
-            display(err)
-            false
+        @testset "full" begin
+            @test try
+                include(joinpath(testdir, "test_full.jl"))
+                true
+            catch err
+                display(err)
+                false
+            end
+        end
+
+        @testset "tufte" begin
+            @test try
+                include(joinpath(testdir, "test_tufte.jl"))
+                true
+            catch err
+                display(err)
+                false
+            end
         end
     end
 end

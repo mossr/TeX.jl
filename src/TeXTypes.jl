@@ -19,62 +19,55 @@ end
 mutable struct TeXSection
     name::String
     body::String
+    code::String
     needs_section_name::Bool
 
-    TeXSection(name = "", body = "", needs_section_name = true) = new(isempty(name) ? getrandtexname() : name, body, isempty(name) ? false : needs_section_name)
+    TeXSection(name="", body="", code="", needs_section_name = true) = new(isempty(name) ? getrandtexname() : name, body, code, isempty(name) ? false : needs_section_name)
 end
 
-mutable struct TeXDocument
-    jobname::String
-    documentclass::String
-    documentfontsizept::Integer
-    packages::Array{TeXPackage}
-    preamble::String
-    commands::Array{TeXCommand}
-    inputs::Array{TeXSection}
-    build_dir::String
-    title::String
-    open::Bool
+@with_kw mutable struct TeXDocument
+    jobname::String = "main"
+    documentclass::String = "article"
+    documentfontsizept::Integer = 11
+    packages::Array{TeXPackage} = TeXPackage[TeXPackage("amsmath")]
+    preamble::String = lstlisting_preamble()
+    commands::Array{TeXCommand} = []
+    inputs::Array{TeXSection} = []
+    build_dir::String = joinpath(".", "")
+    title::String = ""
+    author::String = ""
+    email::String = ""
+    address::String = ""
+    open::Bool = true # open document after compilation
+    tufte::Bool = false # use Tufte style (requires `lualatex` and `pdflatex`)
 
-    TeXDocument(jobname, documentclass, documentfontsizept, packages, preamble, commands, inputs, build_dir, title, open) = new(jobname, documentclass, documentfontsizept, packages, preamble, commands, inputs, build_dir, title, open)
-
-    function TeXDocument()
-        jobname = "main"
-        documentclass = "article"
-        documentfontsizept = 11
-        packages = TeXPackage[
-            TeXPackage("english", "babel"),
-            TeXPackage("usenames, dvipsnames", "xcolor"),
-            TeXPackage("pdfpages"),
-            TeXPackage("amsmath"),
-            TeXPackage("listings"),
-            TeXPackage("tikz"),
-            TeXPackage("beramono"),
-            TeXPackage("fontenc"),
-            TeXPackage("inconsolata"),
-            # TeXPackage("T1", "fontenc"), % blurs pdf2svg
-        ]
-        preamble = read(joinpath(dirname(pathof(TeX)), "..", "include", "julia_preamble.tex"), String)
-        inputs = TeXSection[]
-        commands = TeXCommand[]
-        build_dir = joinpath(".", "")
-        title = ""
-        open = true
-
-        return TeXDocument(jobname, documentclass, documentfontsizept, packages, preamble, commands, inputs, build_dir, title, open)
-    end
-
-    function TeXDocument(jobname::String)
-        tex = TeXDocument()
-        tex.jobname = jobname
-        return tex
-    end
+end
+function TeXDocument(jobname::String; kwargs...)
+    tex = TeXDocument(; kwargs...)
+    tex.jobname = jobname
+    return tex
 end
 
+lstlisting_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "julia_preamble.tex"), String)
+tufte_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "julia_preamble.tex"), String)
+
+addpackage!(doc::TeXDocument, package::TeXPackage) = push!(doc.packages, package)
 addpackage!(doc::TeXDocument, package::String) = push!(doc.packages, TeXPackage(package))
 addpackage!(doc::TeXDocument, option::String, package::String) = push!(doc.packages, TeXPackage(option, package))
 addpackage!(package::String) = addpackage!(WORKINGDOC, package)
 addpackage!(option::String, package::String) = addpackage!(WORKINGDOC, option, package)
+
+function add_lstlisting_packages!(doc::TeXDocument)
+    packages = [TeXPackage("usenames, dvipsnames", "xcolor"),
+                TeXPackage("pdfpages"),
+                TeXPackage("listings"),
+                TeXPackage("beramono"),
+                TeXPackage("fontenc"),
+                TeXPackage("inconsolata"),
+               ]
+    map(pkg->addpackage!(doc, pkg), packages)
+    return length(packages)
+end
 
 addtitle!(doc::TeXDocument, title::String) = doc.title=title
 addtitle!(title::String) = WORKINGDOC.title=title

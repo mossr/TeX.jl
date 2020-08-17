@@ -2,8 +2,9 @@ using TeX
 
 globaldoc() # we are using the global document internal to TeX
 texclear()
+# globaltufte()
 addpackage!("url")
-addtitle!("TestTex.jl")
+addtitle!("Full Example")
 
 @tex L"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
@@ -26,14 +27,10 @@ Harald Cramér in the 1920s. In optimal control the loss is the penalty for fail
 financial risk management the function is precisely mapped to a monetary loss." ->
 function loss_function(theta, X, y)
     m = length(y) # number of training examples
-
     grad = zeros(size(theta))
-
     h = sigmoid(X * theta)
     J = 1/m * sum((-y'*log(h))-(1 .- y)'*log(1 .- h))
-
     grad = 1/m*(X'*(h-y))
-
     return (J, grad)
 end
 
@@ -114,16 +111,24 @@ function conformal_gravity(Rkpc::Float64)
         besx2 = Xkpc/(2*R0kpc)
         besx8 = Xkpc/(8*R0kpc)
 
-        veln = norm^2*((BMod*cMod^2*Xkpc^2)/(2*R0kpc^3)) * (besseli(0,besx2)*besselk(0,besx2) - besseli(1,besx2)*besselk(1,besx2))
+        veln = norm^2*((BMod*cMod^2*Xkpc^2)/(2*R0kpc^3)) *
+            (besseli(0,besx2)*besselk(0,besx2) - besseli(1,besx2) *
+             besselk(1,besx2))
 
         velm = norm^2*((m*cMod^2*Xkpc)/2)
-        velb = norm^2*(((g*cMod^2*Xkpc^2)/(2*R0kpc))*(besseli(1,besx2)*besselk(1,besx2)))
+        velb = norm^2*(((g*cMod^2*Xkpc^2)/(2*R0kpc)) *
+            (besseli(1,besx2)*besselk(1,besx2)))
         velk = norm^2*((k*cMod^2*Xkpc^2)/2)
 
-        veln_gas = norm^2*((N_g*BMod*cMod^2*Xkpc^2)/(2*64*R0kpc^3))*(besseli(0,besx8)*besselk(0,besx8)-besseli(1,besx8)*besselk(1,besx8))
-        velb_gas = norm^2*((N_g*g*cMod^2*Xkpc^2)/(8*R0kpc))*(besseli(1,besx8)*besselk(1,besx8))
+        veln_gas = norm^2*((N_g*BMod*cMod^2*Xkpc^2)/(2*64*R0kpc^3)) *
+            (besseli(0,besx8)*besselk(0,besx8)-besseli(1,besx8) *
+             besselk(1,besx8))
+        velb_gas = norm^2*((N_g*g*cMod^2*Xkpc^2)/(8*R0kpc)) *
+            (besseli(1,besx8)*besselk(1,besx8))
 
-        v_rot[i] = sqrt((N*(veln + velb)) + velm - velk + veln_gas + velb_gas + (v_bulge_n_inner(Xkpc, bulge_b, bulge_t) + v_bulge_b_inner(Xkpc, bulge_b, bulge_t)))
+        v_rot[i] = sqrt((N*(veln + velb)) + velm - velk + veln_gas +
+            velb_gas + (v_bulge_n_inner(Xkpc, bulge_b, bulge_t) +
+            v_bulge_b_inner(Xkpc, bulge_b, bulge_t)))
     end
 
     return v_rot::Float64
