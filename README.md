@@ -33,17 +33,21 @@ cd ..
 ```
 
 
-## Example (`pdflatex` and `lstlisting`):
+## Example
 The following Julia code will produce the [`main.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/main.pdf) file shown below.
 
 ```julia
 using TeX
 
 doc = TeXDocument("main")
+doc.title = T"Simple TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
+doc.author = "Robert Moss"
+doc.address = "Stanford University, Stanford, CA 94305"
+doc.email = "mossr@cs.stanford.edu"
+doc.date = T"\today"
 addpackage!(doc, "url")
-addtitle!(doc, L"Simple Example: \texttt{@tex}")
 
-@tex doc L"In mathematical optimization, statistics, decision theory and machine learning,
+@tex doc T"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
 values of one or more variables onto a real number intuitively representing some ``cost''
 associated with the event.\footnote{\url{https://en.wikipedia.org/wiki/Loss_function}}
@@ -79,19 +83,17 @@ Multiple functions with `@tex` can be used in the same file, see [`test_full.jl`
 
 
 
-## Tufte Example (`lualatex` and `pythontex`):
-Extending the same example as above, the following Julia code will produce the [`tufte.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/tufte.pdf) file shown below.
+## Tufte Example
+Extending the same example as above, adding the following Julia code will produce the [`tufte.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/tufte.pdf) file shown below.
 
 ```julia
 doc.tufte = true
 doc.jobname = "tufte" # PDF file name
-doc.title = "Tufte Example"
-doc.author = "Robert Moss"
-doc.email = "mossr@cs.stanford.edu"
-doc.address = "Stanford University, Stanford, CA 94305"
+doc.title = "Tufte TeX.jl Example"
 texgenerate(doc)
 ```
 
+This runs slower (hence, optional) and uses `lualatex` and `pythontex`.
 The output PDF uses the `algorithm` and `juliaverbatim` environments with a custom `tufte-writeup.cls`.
 
 <kbd>
@@ -99,3 +101,6 @@ The output PDF uses the `algorithm` and `juliaverbatim` environments with a cust
   <img src="https://github.com/mossr/TeX.jl/blob/master/test/tufte.svg">
 </p>
 </kbd>
+
+### Other Examples
+For other examples, see the test files inside the `test/` directory.

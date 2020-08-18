@@ -10,40 +10,28 @@ The tex document will be named after the function (example "algorithm.tex")
 module TeX
 
 using Parameters
+using MacroTools
 
 export @tex,
-       @tex_str,
-       @L_str,
+       @T_str,
        TeXDocument,
        TeXSection,
        texgenerate,
-       texclear,
        globaldoc,
-       globaltufte,
        add!,
-       addpackage!,
-       addtitle!
+       addpackage!
 
 include("TeXTypes.jl")
+include("sugar.jl")
 
 global USE_GLOBAL_DOC = false
 """
 Compile all descriptions and code in the same document.
 """
-globaldoc() = global USE_GLOBAL_DOC = true
-
-global WORKINGDOC
-function texclear()
+function globaldoc()
+    global USE_GLOBAL_DOC = true
     global WORKINGDOC = TeXDocument()
-    return nothing # Suppress REPL
-end
-
-texclear()
-
-
-function globaltufte(toggle=true)
-    global WORKINGDOC
-    WORKINGDOC.tufte = toggle
+    return WORKINGDOC::TeXDocument
 end
 
 
@@ -81,14 +69,22 @@ function textranslate!(tex::TeXDocument)
     if !isempty(tex.title)
         titlespace = tex.tufte ? "" : "\\vspace{-2.0cm}"
         str = string(str, "\n\\title{$titlespace$(tex.title)}\n")
-        str = string(str, "\\date{}\n")
     end
+    str = string(str, "\\date{$(tex.date)}\n")
+
     if !isempty(tex.author)
         if tex.tufte
             str = string(str, "\n\\author{\\name $(tex.author) \\email $(tex.email)\\\\\n")
-            str = string(str, "        \\addr $(tex.address)}\n")
+            str = string(str, "        \\addr $(tex.address) \\hfill \\thedate}\n")
         else
-            str = string(str, "\n\\author{$(tex.author)}\n")
+            str = string(str, "\n\\author{$(tex.author)")
+            if !isempty(tex.address)
+                str = string(str, "\\\\ {\\small $(tex.address)}")
+            end
+            if !isempty(tex.email)
+                str = string(str, "\\\\ {\\small\\texttt{$(tex.email)}}")
+            end
+            str = string(str, "}\n")
         end
     end
 
@@ -256,7 +252,7 @@ function parse_latex(idx, args...)
         expr = args[idx].args[1]
         accompanying_func = true
     end
-    latex = expr.args[3] # [@L_str, "#= comment node =#", "Auto-escaped LaTeX string"]
+    latex = expr.args[3] # [@T_str, "#= comment node =#", "Auto-escaped LaTeX string"]
 
     return (latex, accompanying_func)
 end
@@ -285,7 +281,7 @@ function _tex(tmodule, args...)
         document = WORKINGDOC
         parse_idx = 1
     else
-        # use TeXDocument passed in as input: @tex doc L"..."
+        # use TeXDocument passed in as input: @tex doc T"..."
         doc_idx = 1
         document = @eval(tmodule, $(args[doc_idx]))
         parse_idx = 2
@@ -312,39 +308,28 @@ function _tex(tmodule, args...)
             func = expr[2]
         end
 
-        # eval the code block into the scope of the calling module
-        @eval(tmodule, $func)
-
         firstline::LineNumberNode = args[desc_idx].args[2].args[1]
         file::Symbol = firstline.file
         startline::Int = firstline.line + 1
-        local lastline::LineNumberNode
-        if is_func_block
-            codelines = args[desc_idx].args[end].args[end].args[2].args
-        else
-            codelines = args[desc_idx].args[end].args
-        end
 
-        lastline = codelines[findlast(a->isa(a,LineNumberNode), codelines)]
-        endline::Int = lastline.line + 1
-
-        filelines = readlines(string(file), keep=true)
-        func_str = join(filelines[startline:endline])
+        func_str = get_source(file, startline)
 
         add!(document, latex, name_str, func_str)
+
+        return esc(func) # pass code back to scope of calling module
     else
         add!(document, latex)
     end
 end
 
-# L"" formatted LaTeX string with accompanying function
-# @tex L"\LaTeX un-escaped formatted string" -> function name(...) ... end
+# T"..." formatted LaTeX string with accompanying function
+# @tex T"\LaTeX un-escaped formatted string" -> function name(...) ... end
 macro tex(args...)
     _tex(__module__, args...)
 end
 
-# L"\blah \blah \blah un-escaped"
-macro L_str(latex_str)
+# T"\blah \blah \blah un-escaped"
+macro T_str(latex_str)
     ########################################
     # No op. Used for escaping string before
     # passing to the @tex macro

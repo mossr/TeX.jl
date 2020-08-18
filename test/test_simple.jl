@@ -1,10 +1,14 @@
 using TeX
 
 doc = TeXDocument("main")
+doc.title = T"Simple TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
+doc.author = "Robert Moss"
+doc.address = "Stanford University, Stanford, CA 94305"
+doc.email = "mossr@cs.stanford.edu"
+doc.date = T"\today"
 addpackage!(doc, "url")
-addtitle!(doc, L"Simple Example: \texttt{@tex}")
 
-@tex doc L"In mathematical optimization, statistics, decision theory and machine learning,
+@tex doc T"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
 values of one or more variables onto a real number intuitively representing some ``cost''
 associated with the event.\footnote{\url{https://en.wikipedia.org/wiki/Loss_function}}
@@ -26,12 +30,3 @@ function loss_function(theta, X, y)
 end
 
 texgenerate(doc; output="output_simple") # Compile the document to PDF
-
-# Regenerate using the Tufte-style (and adding an author/email/address)
-doc.tufte = true
-doc.jobname = "tufte"
-doc.title = "Tufte Example"
-doc.author = "Robert Moss"
-doc.email = "mossr@cs.stanford.edu"
-doc.address = "Stanford University, Stanford, CA 94305"
-texgenerate(doc; output="output_simple_tufte")

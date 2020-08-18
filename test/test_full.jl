@@ -1,12 +1,16 @@
 using TeX
 
-globaldoc() # we are using the global document internal to TeX
-texclear()
-# globaltufte()
+doc = globaldoc() # we are using the global document internal to TeX
+# doc.tufte = true
+doc.jobname = "full"
+doc.title = "Full Example"
+doc.author = "Robert Moss"
+doc.address = "Stanford University, Stanford, CA 94305"
+doc.email = "mossr@cs.stanford.edu"
+doc.date = T"\today"
 addpackage!("url")
-addtitle!("Full Example")
 
-@tex L"In mathematical optimization, statistics, decision theory and machine learning,
+@tex T"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
 values of one or more variables onto a real number intuitively representing some ``cost''
 associated with the event.\footnote{\url{https://en.wikipedia.org/wiki/Loss_function}}
@@ -23,8 +27,7 @@ difference between estimated and true values for an instance of data. The concep
 statistics by Abraham Wald in the middle of the 20th Century. In the context of economics, for example, this is usually
 economic cost or regret. In classification, it is the penalty for an incorrect classification of an example. In actuarial
 science, it is used in an insurance context to model benefits paid over premiums, particularly since the works of
-Harald Cramér in the 1920s. In optimal control the loss is the penalty for failing to achieve a desired value. In
-financial risk management the function is precisely mapped to a monetary loss." ->
+Harald Cramér in the 1920s. In optimal control the loss is the penalty for failing to achieve a desired value." ->
 function loss_function(theta, X, y)
     m = length(y) # number of training examples
     grad = zeros(size(theta))
@@ -36,9 +39,8 @@ end
 
 
 
-const e = Base.MathConstants.e # \euler ℯ
 
-@tex L"A sigmoid function is a mathematical function having an \"S\" shape (sigmoid curve).
+@tex T"A sigmoid function is a mathematical function having an \"S\" shape (sigmoid curve).
 Often, sigmoid function refers to the special case of the logistic function shown in the first figure and defined by the formula:
 
 \begin{equation}
@@ -51,19 +53,21 @@ function of artificial neurons, including the logistic and hyperbolic tangent fu
 as cumulative distribution functions, such as the integrals of the logistic distribution, the normal distribution, and Student's
 $t$ probability density functions.\footnote{\url{https://en.wikipedia.org/wiki/Sigmoid_function}}" ->
 # return is of size/dimensions: zeros(size(t))
-sigmoid(t) = 1 ./ (1 .+ e.^(-t))
+sigmoid(t) = 1 / (1 + exp(-t))
 
 
 
-@tex L"Here's an example of plotting a sigmoid function." ->
+@tex T"Here's an example of plotting a sigmoid function." ->
 begin
     using UnicodePlots
-    display(lineplot(sigmoid.(-5:0.1:5), title="Sigmoid", xlabel="t", ylabel="sigmoid(t)"))
+    display(lineplot(sigmoid.(-5:0.1:5), title="Sigmoid",
+                                         xlabel="t",
+                                         ylabel="sigmoid(t)"))
 end
 
 
 
-@tex L"This algorithm is intended to be a test of the \texttt{@tex} Julia macro.
+@tex T"This algorithm is intended to be a test of the \texttt{@tex} Julia macro.
 Let's \textit{not} start a new paragraph.
 Here's some more text for the \LaTeX{} document." ->
 function test_algorithm(x::Int, y::Int, z::Int)
@@ -74,7 +78,7 @@ function test_algorithm(x::Int, y::Int, z::Int)
 end
 
 
-@tex L"We can immediately see the departures from the GR prediction, where as the two new factors $\gamma$ and $k$ arise due to the fact that the conformal theory is fourth order and thus must contain two additional terms. It should also be noted that when $\gamma$ and $k$ are small, we return the exact Schwarzchild solution. For a more rigorous treatment of the derivation see. Now that we have the ``Schwarzchild like'' solution for conformal gravity, we can effectively follow the procedure above by noting that a galaxy is a disk with exponential density falloff in the radial direction. The only other issue that conformal gravity needs to account for is local vs. global effects. Since the theory is fourth order in construction, we no long possess the power of a global guess law. Hence, the integration must be made both locally and globally which gives rise to the total rotational prediction of the galaxy as
+@tex T"We can immediately see the departures from the GR prediction, where as the two new factors $\gamma$ and $k$ arise due to the fact that the conformal theory is fourth order and thus must contain two additional terms. It should also be noted that when $\gamma$ and $k$ are small, we return the exact Schwarzchild solution. For a more rigorous treatment of the derivation see. Now that we have the ``Schwarzchild like'' solution for conformal gravity, we can effectively follow the procedure above by noting that a galaxy is a disk with exponential density falloff in the radial direction. The only other issue that conformal gravity needs to account for is local vs. global effects. Since the theory is fourth order in construction, we no long possess the power of a global guess law. Hence, the integration must be made both locally and globally which gives rise to the total rotational prediction of the galaxy as
 
 \begin{equation}
 v_{\rm CG}(R) =
@@ -136,7 +140,7 @@ end
 
 
 # Free-hanging latex paragraph.
-@tex L"Similar to all other observed rotation curves, the Milky Way suffers from the same missing mass problem. The prediction set forth by general relativity (GR) can be found by starting with a single point mass solution to the field equations, and then modeling the galaxy as a collection of point masses arranged in a disk. We assume for simplicity that the disk is infinitely thin, and the distribution of mass falls exponentially as
+@tex T"Similar to all other observed rotation curves, the Milky Way suffers from the same missing mass problem. The prediction set forth by general relativity (GR) can be found by starting with a single point mass solution to the field equations, and then modeling the galaxy as a collection of point masses arranged in a disk. We assume for simplicity that the disk is infinitely thin, and the distribution of mass falls exponentially as
     \begin{equation}
     \Sigma(R)=\Sigma_0e^{-\frac{R}{R_0}}\\
     \end{equation}
@@ -158,7 +162,7 @@ end
 
 
 
-@tex L"This function is to push the \texttt{@tex} macro." ->
+@tex T"This function is to push the \texttt{@tex} macro." ->
 function
 messy(arg1::Int,
       arg2::UInt32,
@@ -168,11 +172,11 @@ messy(arg1::Int,
 end
 
 
-@tex L"Here's a one-liner:" ->
+@tex T"Here's a one-liner:" ->
 f(x,y,c=10) = 2x^2 + 5y^3 + c
 
 
-@tex L"Here's a two-liner:" ->
+@tex T"Here's a two-liner:" ->
 g(x,y,c=10) =
     2x^2 + 5y^3 + c
 

@@ -1,13 +1,14 @@
 using TeX
 
 doc = TeXDocument("tufte"; tufte=true)
+doc.title = "Tufte TeX.jl Example with Sigmoid"
 doc.author = "Robert Moss"
-doc.email = "mossr@cs.stanford.edu"
 doc.address = "Stanford University, Stanford, CA 94305"
+doc.email = "mossr@cs.stanford.edu"
+doc.date = T"\today"
 addpackage!(doc, "url")
-addtitle!(doc, "Tufte Example")
 
-@tex doc L"In mathematical optimization, statistics, decision theory and machine learning,
+@tex doc T"In mathematical optimization, statistics, decision theory and machine learning,
 a \textit{loss function} or \textit{cost function} is a function that maps an event or
 values of one or more variables onto a real number intuitively representing some ``cost''
 associated with the event.\footnote{\url{https://en.wikipedia.org/wiki/Loss_function}}
@@ -27,5 +28,18 @@ function loss_function(theta, X, y)
     grad = 1/m*(X'*(h-y))
     return (J, grad)
 end
+
+
+
+@tex doc T"A sigmoid function is a mathematical function having an \"S\" shape
+(sigmoid curve). Often, sigmoid function refers to the special case of the logistic
+function shown in the first figure and defined by the formula.\footnote{\url{https://en.wikipedia.org/wiki/Sigmoid_function}}
+
+\begin{equation}
+\sigma(t) = \frac{1}{1 + e^{-t}}
+\end{equation}" ->
+# return is of size/dimensions: zeros(size(t))
+sigmoid(t) = 1 / (1 + exp(-t))
+
 
 texgenerate(doc; output="output_tufte") # Compile the document to PDF

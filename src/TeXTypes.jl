@@ -38,6 +38,7 @@ end
     author::String = ""
     email::String = ""
     address::String = ""
+    date::String = ""
     open::Bool = true # open document after compilation
     tufte::Bool = false # use Tufte style (requires `lualatex` and `pdflatex`)
 
@@ -68,6 +69,3 @@ function add_lstlisting_packages!(doc::TeXDocument)
     map(pkg->addpackage!(doc, pkg), packages)
     return length(packages)
 end
-
-addtitle!(doc::TeXDocument, title::String) = doc.title=title
-addtitle!(title::String) = WORKINGDOC.title=title
