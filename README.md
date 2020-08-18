@@ -77,7 +77,7 @@ Multiple functions with `@tex` can be used in the same file, see [`test_full.jl`
 
 <kbd>
 <p align="center">
-  <img src="https://github.com/mossr/TeX.jl/blob/master/test/main.svg">
+  <img src="./test/main.svg">
 </p>
 </kbd>
 
@@ -98,7 +98,7 @@ The output PDF uses the `algorithm` and `juliaverbatim` environments with a cust
 
 <kbd>
 <p align="center">
-  <img src="https://github.com/mossr/TeX.jl/blob/master/test/tufte.svg">
+  <img src="./test/tufte.svg">
 </p>
 </kbd>
 
