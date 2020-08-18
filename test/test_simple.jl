@@ -1,7 +1,7 @@
 using TeX
 
 doc = TeXDocument("main")
-doc.title = T"Simple TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
+doc.title = T"Simple \TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
 doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"

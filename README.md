@@ -40,7 +40,7 @@ The following Julia code will produce the [`main.pdf`](https://github.com/mossr/
 using TeX
 
 doc = TeXDocument("main")
-doc.title = T"Simple TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
+doc.title = T"Simple \TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
 doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
@@ -89,7 +89,7 @@ Extending the same example as above, adding the following Julia code will produc
 ```julia
 doc.tufte = true
 doc.jobname = "tufte" # PDF file name
-doc.title = "Tufte TeX.jl Example"
+doc.title = T"Tufte \TeX.jl Example"
 texgenerate(doc)
 ```
 
