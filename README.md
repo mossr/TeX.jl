@@ -75,7 +75,7 @@ The output PDF uses the `algorithm` and `juliaverbatim` environments with a cust
 
 
 ## PGFPlots.jl Example
-This package also integrates with [PGFPlots.jl](). A simple plotting example is shown below and outputs the [`pgfplots.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/pgfplots.pdf) file.
+This package also integrates with [PGFPlots.jl](https://github.com/JuliaTeX/PGFPlots.jl). A simple plotting example is shown below and outputs the [`pgfplots.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/pgfplots.pdf) file.
 
 ```julia
 using TeX
