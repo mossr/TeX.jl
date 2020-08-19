@@ -42,4 +42,4 @@ function shown in the first figure and defined by the formula.\footnote{\url{htt
 sigmoid(t) = 1 / (1 + exp(-t))
 
 
-texgenerate(doc; output="output_tufte") # Compile the document to PDF
+texgenerate(doc; output="output_$(doc.jobname)") # Compile the document to PDF

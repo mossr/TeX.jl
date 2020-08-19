@@ -30,7 +30,7 @@ end
     documentclass::String = "article"
     documentfontsizept::Integer = 11
     packages::Array{TeXPackage} = TeXPackage[TeXPackage("amsmath")]
-    preamble::String = lstlisting_preamble()
+    preamble::String = ""
     commands::Array{TeXCommand} = []
     inputs::Array{TeXSection} = []
     build_dir::String = joinpath(".", "")
@@ -41,8 +41,10 @@ end
     date::String = ""
     open::Bool = true # open document after compilation
     tufte::Bool = false # use Tufte style (requires `lualatex` and `pdflatex`)
-
+    auto_sections::Bool = true # automatically create \sections using function names
+    remove_begin::Bool = true # remove begin/end block (for multi-lines of non-function code)
 end
+
 function TeXDocument(jobname::String; kwargs...)
     tex = TeXDocument(; kwargs...)
     tex.jobname = jobname

@@ -8,6 +8,10 @@ testfiles = ["test_simple.jl",
              "test_multiline.jl",
              "test_stressing.jl",
              "test_nocode.jl",
+             "test_pgfplots.jl",
+             "test_escaping.jl",
+             "test_binomial.jl",
+             "test_machine_learning.jl",
             ]
 
 testdir = joinpath(dirname(@__DIR__), "test")

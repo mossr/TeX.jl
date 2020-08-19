@@ -48,5 +48,5 @@ end
 end
 
 
-texgenerate(doc; output="output_stressing")
-texgenerate(; output="output_stressing_global")
+texgenerate(doc; output="output_$(doc.jobname)")
+texgenerate(; output="output_$(doc.jobname)_global")

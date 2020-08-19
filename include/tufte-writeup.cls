@@ -66,7 +66,7 @@
 
 
 \usepackage[usefamily={jl,julia}]{pythontex}
-
+\setpythontexpygopt{style=algforopt} % syntax coloring (blue)
 \usepackage{microtype}
 
 \fvset{baselinestretch=0.8}
@@ -79,8 +79,8 @@
 \newcommand{\todo}[1]{\textbf{\textcolor{magenta}{#1}}}
 \newcommand{\needcite}{\todo{cite}}
 
-\newcommand{\true}{\text{true}}
-\newcommand{\false}{\text{false}}
+\newcommand{\true}{{\rm true}}
+\newcommand{\false}{{\rm false}}
 \newcommand{\transpose}{\top}
 
 
@@ -100,11 +100,11 @@
 \newcommand{\argmin}{\operatornamewithlimits{arg\,min}}
 \newcommand{\argmax}{\operatornamewithlimits{arg\,max}}
 \newcommand{\subjectto}{\operatorname{subject~to}}
-\newcommand{\for}{\text{for} \;}
+\newcommand{\for}{{\rm for} \;}
 \newcommand{\gaussian}[2]{\mathcal{N}(#1, #2)}
 \DeclareMathOperator{\sign}{sign}
-\DeclareMathOperator{\Real}{\text{Re}}
-\DeclareMathOperator{\Imag}{\text{Im}}
+\DeclareMathOperator{\Real}{{\rm Re}}
+\DeclareMathOperator{\Imag}{{\rm Im}}
 \DeclareMathOperator{\nil}{\textsc{nil}}
 \DeclareMathOperator{\Expectation}{\mathbb{E}}
 \DeclareMathOperator{\Variance}{\mathrm{Var}}
@@ -112,6 +112,52 @@
 \DeclareMathOperator{\Uniform}{\mathcal{U}}
 \DeclareMathOperator{\atantwo}{atan2}
 \DeclareMathOperator{\modOne}{mod_1}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\SD}{SD}
+\DeclareMathOperator{\Ber}{Ber}
+\DeclareMathOperator{\Bin}{Bin}
+\DeclareMathOperator{\Poi}{Poi}
+\DeclareMathOperator{\Geo}{Geo}
+\DeclareMathOperator{\NegBin}{NegBin}
+\DeclareMathOperator{\Uni}{Uni}
+\DeclareMathOperator{\Exp}{Exp}
+\DeclareMathOperator{\Dir}{Dir}
+\newcommand*\Eval[1]{\left.#1\right\rvert} % derivative/integration evaluation bar |
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\BetaDistribution}{Beta}
+\DeclareMathOperator{\Beta}{Beta}
+\DeclareMathOperator{\GammaDist}{Gamma}
+\DeclareMathOperator{\Gumbel}{Gumbel}
+\DeclareMathOperator{\Std}{Std}
+\DeclareMathOperator{\Train}{\mathcal{D}_{\rm train}}
+\DeclareMathOperator{\Dtrain}{\mathcal{D}_{\rm train}}
+\DeclareMathOperator{\TrainLoss}{TrainLoss}
+\DeclareMathOperator{\Loss}{Loss}
+\DeclareMathOperator{\ZeroOneLoss}{Loss_{0{\rm -}1}}
+\DeclareMathOperator{\SquaredLoss}{Loss_{\rm squared}}
+\DeclareMathOperator{\AbsDevLoss}{Loss_{\rm absdev}}
+\DeclareMathOperator{\HingeLoss}{Loss_{\rm hinge}}
+\DeclareMathOperator{\LogisticLoss}{Loss_{\rm logistic}}
+\newcommand{\bfw}{\mathbf{w}}
+\newcommand{\bbI}{\mathbb{I}}
+\newcommand{\E}{\mathbb{E}}
+\DeclareMathOperator{\Miss}{Miss}
+\DeclareMathOperator{\sgn}{sgn}
+\newcommand{\1}{\mathbb{1}}
+\renewcommand{\v}{\mathbf{v}}
+\newcommand{\V}{\mathbf{V}}
+\newcommand{\w}{\mathbf{w}}
+\newcommand{\h}{\mathbf{h}}
+\newcommand{\opt}{*}
+\DeclareMathOperator{\States}{States}
+\DeclareMathOperator{\StartState}{s_{\rm state}}
+\DeclareMathOperator{\Actions}{Actions}
+\DeclareMathOperator{\Reward}{Reward}
+\DeclareMathOperator{\IsEnd}{IsEnd}
+\DeclareMathOperator{\Cost}{Cost}
+\DeclareMathOperator{\FutureCost}{FutureCost}
+\DeclareMathOperator{\Succ}{Succ}
+
 
 % remove empty lines from juliaconsole
 % from: https://github.com/gpoore/pythontex/issues/98#issuecomment-318078264
@@ -460,3 +506,18 @@
 
 \renewcommand{\vec}[1]{\vect{#1}}
 \newcommand{\mat}[1]{\vect{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Colors
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{stanfordred}{RGB}{140,21,21}
+\definecolor{darkgreen}{RGB}{21,140,21}
+\definecolor{darkblue}{RGB}{21,21,140}
+\definecolor{sun}{RGB}{234,171,0}
+\definecolor{pastelMagenta}{HTML}{FF48CF}
+\definecolor{pastelPurple}{HTML}{8770FE}
+\definecolor{pastelBlue}{HTML}{1BA1EA}
+\definecolor{pastelSeaGreen}{HTML}{14B57F}
+\definecolor{pastelGreen}{HTML}{3EAA0D}
+\definecolor{pastelOrange}{HTML}{C38D09}
+\definecolor{pastelRed}{HTML}{F5615C}

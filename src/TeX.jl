@@ -11,6 +11,7 @@ module TeX
 
 using Parameters
 using MacroTools
+using PGFPlots
 
 export @tex,
        @T_str,
@@ -19,18 +20,22 @@ export @tex,
        texgenerate,
        globaldoc,
        add!,
-       addpackage!
+       addpackage!,
+       addpdfplots!,
+       addplot!
 
 include("TeXTypes.jl")
 include("sugar.jl")
+include("pgfplots.jl")
+
 
 global USE_GLOBAL_DOC = false
 """
 Compile all descriptions and code in the same document.
 """
-function globaldoc()
+function globaldoc(jobname::String="main"; kwargs...)
     global USE_GLOBAL_DOC = true
-    global WORKINGDOC = TeXDocument()
+    global WORKINGDOC = TeXDocument(jobname; kwargs...)
     return WORKINGDOC::TeXDocument
 end
 
@@ -38,11 +43,11 @@ end
 function textranslate!(tex::TeXDocument)
     if tex.tufte
         tex.documentclass = "tufte-writeup"
-        tex.preamble = ""
+        local_preamble = ""
         fontoption = ""
     else
         tex.documentclass = "article"
-        tex.preamble = lstlisting_preamble()
+        local_preamble = lstlisting_preamble()
         length_added_pkgs = add_lstlisting_packages!(tex)
         fontoption = "[$(tex.documentfontsizept)pt]"
     end
@@ -61,8 +66,9 @@ function textranslate!(tex::TeXDocument)
         tex.packages = tex.packages[1:end-length_added_pkgs]
     end
 
-    if length(tex.preamble) > 0
-        str = string(str, tex.preamble, "\n")
+    full_preamble = string(tex.preamble, local_preamble)
+    if length(full_preamble) > 0
+        str = string(str, full_preamble, "\n")
     end
 
     for c in tex.commands
@@ -105,11 +111,12 @@ function textranslate!(tex::TeXDocument)
     return str
 end
 
+
 function texwrite(tex::TeXDocument)
     # writes each input file
     for input in tex.inputs
         file = open(abspath(joinpath(tex.build_dir, input.name * ".tex")), "w")
-        if input.needs_section_name
+        if input.needs_section_name && tex.auto_sections
             write(file, string("\\section{", texformat(input.name), "}\n"))
         end
         write(file, input.body)
@@ -129,8 +136,10 @@ function texwrite(tex::TeXDocument)
     close(main)
 end
 
+
 function texcompile(tex::TeXDocument)
     if tex.tufte
+        output_directory = abspath("output")
         cmd_lualatex = ["lualatex",
                "-shell-escape",
                "--aux-directory=output", # TODO: tex.build_dir
@@ -138,7 +147,11 @@ function texcompile(tex::TeXDocument)
                "--include-directory=output", # TODO: tex.build_dir
                tex.jobname]
         @info "Running: $(`$cmd_lualatex`)"
-        run(`$cmd_lualatex`)
+        try
+            run(`$cmd_lualatex`)
+        catch err
+            error("See log file for error information: $(joinpath(output_directory, tex.jobname*".log"))")
+        end            
 
         # open compiled pdf before pdflatex
         if tex.open
@@ -155,22 +168,32 @@ function texcompile(tex::TeXDocument)
             # TODO: biber --input-directory=tex output/main
 
             @info "Running: $(`$cmd_lualatex`)"
-            run(`$cmd_lualatex`)
+            try
+                run(`$cmd_lualatex`)
+            catch err
+                error("See log file for error information: $(joinpath(output_directory, tex.jobname*".log"))")
+            end
         end
     else
         filename = tex.jobname * ".tex"
+        output_directory = abspath(tex.build_dir)
         cmd = ["pdflatex", "-quiet", abspath(filename)]
         if tex.build_dir != ""
-            push!(cmd, string("-aux-directory=", abspath(tex.build_dir)))
-            push!(cmd, string("-output-directory=", abspath(tex.build_dir)))
+            push!(cmd, string("-aux-directory=", output_directory))
+            push!(cmd, string("-output-directory=", output_directory))
             include_dir = joinpath(dirname(pathof(TeX)), "include")
             include_dirs = [dirname(abspath(filename)), include_dir]
             map(d->push!(cmd,"-include-directory=$d"), include_dirs)
         end
         @info "Running: $(`$cmd`)"
-        run(`$cmd`)
+        try
+            run(`$cmd`)
+        catch err
+            error("See log file for error information: $(joinpath(output_directory, tex.jobname*".log"))")
+        end
     end
 end
+
 
 function texopen(tex::TeXDocument)
     pdf = tex.jobname * ".pdf"
@@ -180,7 +203,6 @@ function texopen(tex::TeXDocument)
     end
 end
 
-const TeXSections = Array{TeXSection}
 
 function texgenerate(document::TeXDocument; output="output")
     isdir(output) ? nothing : mkdir(output) # TODO. document.build_dir
@@ -233,35 +255,19 @@ function texformat(str::String; replace_with_spaces::Bool=true, use_title_case::
     return str
 end
 
-# TODO: environment function.
-function lstlisting(code::String)
-    str = "\n\\begin{lstlisting}\n"
-    str *= code
-    str *= "\n\\end{lstlisting}\n"
+
+function environment(envname::String, code::String; options::String="")
+    isempty(options) ? nothing : options="[$options]"
+    str = """
+    \\begin{$envname}$options
+    $code
+    \\end{$envname}
+    """
 end
 
-function juliaverbatim(code::String)
-    str = "\n\\begin{algorithm}\n"
-    str *= "\n\\begin{juliaverbatim}\n"
-    str *= code # TODO: Strip left space
-    str *= "\n\\end{juliaverbatim}\n"
-    str *= "\n\\end{algorithm}\n"
-end
 
-function parse_latex(idx, args...)
-    local accompanying_func::Bool
-
-    if isa(args[idx].args[1], Symbol)
-        expr = args[idx]
-        accompanying_func = false
-    else
-        expr = args[idx].args[1]
-        accompanying_func = true
-    end
-    latex = expr.args[3] # [@T_str, "#= comment node =#", "Auto-escaped LaTeX string"]
-
-    return (latex, accompanying_func)
-end
+lstlisting(code::String) = environment("lstlisting", code)
+juliaverbatim(code::String) = environment("algorithm", environment("juliaverbatim", code))
 
 
 function add!(document::TeXDocument, latex_str::String, name_str::String = "", func_str::String = "")
@@ -273,9 +279,9 @@ function add!(document::TeXDocument, latex_str::String, name_str::String = "", f
     push!(document.inputs, input)
 end
 
-function add!(document::TeXDocument, input::TeXSection)
-    push!(document.inputs, input)
-end
+add!(document::TeXDocument, input::TeXSection) = push!(document.inputs, input)
+
+
 
 function find_first_line(code::Union{Expr, LineNumberNode})
     if isa(code, LineNumberNode)
@@ -293,6 +299,37 @@ function find_first_line(code::Union{Expr, LineNumberNode})
     return lnn
 end
 
+
+function remove_begin_block(func_str::String)
+    if match(r"^begin", func_str) !== nothing
+        r_begin = r"^begin\n(.*)\n^end"ms
+        m_begin = match(r_begin, func_str)
+        if m_begin !== nothing
+            # remove begin/end
+            func_str = string(m_begin.captures[1])
+            r_first_indent = r"^(\s+)"
+            m_first_indent = match(r_first_indent, func_str)
+
+            # if there are indents, remove one set of them
+            if m_first_indent !== nothing
+                if m_first_indent.captures[1] == "\t"
+                    # using tabs.
+                    r_indent = Regex("^\t")
+                else
+                    # using spaces.
+                    num_spaces = length(m_first_indent.captures[1])
+                    r_indent = Regex("^ {$num_spaces,$num_spaces}")
+                end
+                lines = split(func_str, '\n')
+                unindented_lines = map(line->replace(line, r_indent=>""), lines)
+                func_str = join(unindented_lines, '\n')
+            end
+        end
+    end
+    return func_str::String
+end
+
+
 function _tex(document::TeXDocument, code::Union{Expr, Nothing};
               file::String="", doc_sym::Symbol=Symbol(), latex::String="",
               func_name::String="", startline::Int=0)
@@ -308,6 +345,11 @@ function _tex(document::TeXDocument, code::Union{Expr, Nothing};
         end
         func_str = replace(func_str, r_tex_doc=>"")
 
+        # remove begin/end block and reindent
+        if document.remove_begin
+            func_str = remove_begin_block(func_str)
+        end
+
         add!(document, latex, func_name, func_str)
 
         return esc(code) # pass code back to scope of calling module
@@ -317,11 +359,25 @@ function _tex(document::TeXDocument, code::Union{Expr, Nothing};
 end
 
 
-function __tex(doc::TeXDocument, tex_and_or_code::Expr, file::String, source_line::Int; doc_sym::Symbol=Symbol())
-    if tex_and_or_code.head == :(->)
+function __tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String}, file::String, source_line::Int; doc_sym::Symbol=Symbol())
+    if isa(tex_and_or_code, String)
+        # LaTeX description only.
+        return _tex(doc, nothing; file=file, latex=tex_and_or_code)
+    elseif tex_and_or_code.head == :macrocall && tex_and_or_code.args[1] == Symbol("@T_str")
+        # LaTeX description only (using T"...")
+        latex = @eval($tex_and_or_code)
+        return _tex(doc, nothing; file=file, latex=latex)
+    elseif tex_and_or_code.head == :(->)
         # Includes LaTeX descriptions.
-        desc_block::Expr = tex_and_or_code.args[1]
-        latex::String = @eval($desc_block)
+        desc_block = tex_and_or_code.args[1]
+        if isa(desc_block, Expr)
+            # Used T"..."
+            latex::String = @eval($desc_block)
+        else
+            # Passed in as a String
+            latex = desc_block
+        end
+
         code::Expr = tex_and_or_code.args[2]
         
         startline::Int = find_first_line(code) + 1
@@ -336,14 +392,14 @@ function __tex(doc::TeXDocument, tex_and_or_code::Expr, file::String, source_lin
             # No function name (i.e. begin blocks, etc)
             return _tex(doc, code; file=file, latex=latex, startline=startline)
         end
-    elseif tex_and_or_code.head == :macrocall && tex_and_or_code.args[1] == Symbol("@T_str")
-        # LaTeX description only.
-        latex = @eval($tex_and_or_code)
-        return _tex(doc, nothing; file=file, latex=latex)
     else
         # Does not include a latex description (i.e. code only)
-        name_sym = tex_and_or_code.args[1].args[1]
-        name_str = string(name_sym)
+        if isa(tex_and_or_code.args[1], LineNumberNode)
+            name_str = ""
+        else
+            name_sym = tex_and_or_code.args[1].args[1]
+            name_str = string(name_sym)
+        end
 
         code = tex_and_or_code
         startline = source_line
@@ -355,7 +411,7 @@ end
 
 """
 Examples:
-—————————
+
 @tex doc function name(inputs)
     ...
 end
@@ -368,8 +424,11 @@ end
 
 
 @tex doc T"Just LaTeX strings and no Julia code"
+
+
+@tex doc "Just strings with manual escaping"
 """
-macro tex(doc_sym::Symbol, tex_and_or_code::Expr)
+macro tex(doc_sym::Symbol, tex_and_or_code::Union{Expr, String})
     doc::TeXDocument = @eval(__module__, $doc_sym)
     file::String = string(__source__.file)
     source_line::Int = __source__.line
@@ -379,14 +438,16 @@ end
 
 """
 Examples (global document):
-—————————
+
 @tex function name(inputs)
     ...
 end
 
 @tex T"LaTeX formatted strings and no Julia code"
+
+@tex "Strings with manual escaping and no Julia code"
 """
-macro tex(tex_and_or_code::Expr)
+macro tex(tex_and_or_code::Union{Expr, String})
     # use global document
     global WORKINGDOC
     if !@isdefined(WORKINGDOC)
@@ -407,5 +468,6 @@ macro T_str(latex_str)
     ########################################
     return latex_str
 end
+
 
 end # module TeX

@@ -187,7 +187,7 @@ function run_tex_test()
     println()
     @info "Running @tex test... "
     try
-        texgenerate(; output="output_test")
+        texgenerate(; output="output_$(doc.jobname)")
         printstyled("[ Done!\n", bold = true, color = :green)
     catch e
         printstyled("[ Failed!\n", bold = true, color = :red)

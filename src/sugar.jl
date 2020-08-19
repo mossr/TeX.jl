@@ -18,6 +18,7 @@ function get_source_at(file::String, linestart::Integer)
             end
         end
     end
+    # TODO: add error if @tex is at the end of the file.
     code, str
 end
 

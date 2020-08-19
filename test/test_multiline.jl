@@ -35,4 +35,4 @@ g(x,
     c
 
 
-texgenerate(; output="output_unicodeplot")
+texgenerate(; output="output_$(doc.jobname)")

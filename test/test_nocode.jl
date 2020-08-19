@@ -22,4 +22,4 @@ doc.tufte = true # skips pythontex when no code is present.
 \lipsum[4]
 """
 
-texgenerate(doc; output="output_nocode")
+texgenerate(doc; output="output_$(doc.jobname)")
