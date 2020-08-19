@@ -59,13 +59,14 @@ addpackage!(package::String) = addpackage!(WORKINGDOC, package)
 addpackage!(option::String, package::String) = addpackage!(WORKINGDOC, option, package)
 
 function add_lstlisting_packages!(doc::TeXDocument)
-    packages = [TeXPackage("usenames, dvipsnames", "xcolor"),
+    packages = [TeXPackage("american", "babel"),
+                TeXPackage("usenames, dvipsnames", "xcolor"),
                 TeXPackage("pdfpages"),
                 TeXPackage("listings"),
                 TeXPackage("beramono"),
                 TeXPackage("fontenc"),
                 TeXPackage("inconsolata"),
                ]
-    map(pkg->addpackage!(doc, pkg), packages)
+    map(pkg->pushfirst!(doc.packages, pkg), reverse(packages)) # prepend
     return length(packages)
 end

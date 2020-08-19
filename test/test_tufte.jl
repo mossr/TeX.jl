@@ -1,6 +1,6 @@
 using TeX
 
-doc = TeXDocument("tufte"; tufte=true)
+doc = TeXDocument("tufte_solo"; tufte=true)
 doc.title = "Tufte TeX.jl Example with Sigmoid"
 doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"

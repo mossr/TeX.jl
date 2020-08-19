@@ -34,7 +34,7 @@ cd ..
 
 
 ## Example
-The following Julia code will produce the [`main.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/main.pdf) file shown below.
+The following Julia code will produce the [`main.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/main.pdf) file shown below.
 
 ```julia
 using TeX
@@ -84,7 +84,7 @@ Multiple functions with `@tex` can be used in the same file, see [`test_full.jl`
 
 
 ## Tufte Example
-Extending the same example as above, adding the following Julia code will produce the [`tufte.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/tufte.pdf) file shown below.
+Extending the same example as above, adding the following Julia code will produce the [`tufte.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/tufte.pdf) file shown below.
 
 ```julia
 doc.tufte = true
@@ -103,4 +103,4 @@ The output PDF uses the `algorithm` and `juliaverbatim` environments with a cust
 </kbd>
 
 ### Other Examples
-For other examples, see the test files inside the `test/` directory.
+For other examples, see the test files inside the [`test/`](https://github.com/mossr/TeX.jl/blob/master/test/) directory.
