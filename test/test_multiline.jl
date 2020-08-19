@@ -1,8 +1,5 @@
 using TeX
 
-# TODO: Fix multiline discrepancy for keyword arguments (just this example)
-# ^^^^: i.e. move away from reading lines in the file itself...
-
 doc = globaldoc() # we are using the global document internal to TeX
 doc.jobname = "multiline"
 doc.title = "Multiline Debugging"
