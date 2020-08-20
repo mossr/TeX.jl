@@ -78,7 +78,7 @@ IEEE | Tufte
 <kbd> <a href="./test/pdf/ieee.pdf"><img src="./test/svg/ieee.svg"></a> </kbd> | <kbd> <a href="./test/pdf/tufte.pdf"><img src="./test/svg/tufte.svg"></a> </kbd>
 
 
-#### Tufte Style
+### Tufte Style
 The Tufte style will run slower (hence, optional) and uses `lualatex` and `pythontex`.
 The output PDF uses the `algorithm` and `juliaverbatim` environments included in a custom `tufte-writeup.cls`.
 
@@ -222,7 +222,7 @@ For other examples, see the test files inside the [`test/`](https://github.com/m
 ] add https://github.com/mossr/TeX.jl
 ```
 
-#### Tufte-style Installation (`pythontex`)
+### Tufte-style Installation (`pythontex`)
 _These steps are only required if you set `doc.tufte=true`._
 
 This requires `lualatex` and `pythontex`.
