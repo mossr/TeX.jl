@@ -1,7 +1,8 @@
 using TeX
 
 doc = TeXDocument("pgfplots"; title=T"\TeX.jl Example using PGFPlots.jl")
-addpdfplots!(doc)
+doc.build_dir = "output_$(doc.jobname)"
+doc.pgfplots = true
 
 @tex doc "The following Julia code produces the plot below." ->
 begin
@@ -12,4 +13,4 @@ begin
     addplot!(doc, p)
 end
 
-texgenerate(doc; output="output_$(doc.jobname)")
+texgenerate(doc)

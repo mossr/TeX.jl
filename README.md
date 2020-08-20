@@ -5,12 +5,12 @@ We recommend [MiKTeX](https://miktex.org/download) or [TeX Live](https://www.tug
 
 
 ## Example
-The following Julia code will produce the [`main.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/main.pdf) file shown below.
+The following Julia code will produce the [`default.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/default.pdf) file shown below.
 
 ```julia
 using TeX
 
-doc = TeXDocument("main")
+doc = TeXDocument("default") # PDF file name
 doc.title = T"Simple \TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
 doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
@@ -27,8 +27,8 @@ either a loss function or its negative (sometimes called a \textit{reward functi
 or a \textit{utility function}), in which case it is to be maximized.
 
 \begin{equation}
-J(\theta) = \frac{1}{m}\sum_{i=1}^{m}\left[ -y^{(i)} \log(h_{\theta}(x^{(i)})) -
-                (1 - y^{(i)}) \log(1 - h_{\theta}(x^{(i)}))\right]
+    J(\theta) = \frac{1}{m}\sum_{i=1}^{m}\biggl[ -y_i \log(h_{\theta}(x_i)) -
+                    (1 - y_i) \log(1 - h_{\theta}(x_i)) \biggr]
 \end{equation}" ->
 function loss_function(theta, X, y)
     m = length(y) # number of training examples
@@ -44,34 +44,43 @@ texgenerate(doc) # Compile the document to PDF
 
 The output PDF is generated using `pdflatex`.
 The PDF includes title cased function names as sections with descriptions above the Julia function in a `lstlisting` environment.
-Multiple functions with `@tex` can be used in the same file, see [`test_full.jl`](https://github.com/mossr/TeX.jl/blob/master/test/test_full.jl) for examples.
+Multiple functions with `@tex` can be used in the same file, see the [Advanced Example](https://github.com/mossr/TeX.jl/#advanced-example) below.
 
-<kbd>
-<p align="center">
-  <img src="./test/pdf/main.svg">
-</p>
-</kbd>
+Extending the same example as above, we can change the style of the document:
+- [JMLR](https://www.jmlr.org/format/format.html) style:
+  - ```julia
+    doc.jmlr = true
+    doc.title = T"JMLR \TeX.jl Example"
+    texgenerate(doc)
+    ``` 
+- [IEEETran](https://ctan.org/pkg/ieeetran?lang=en#:~:text=IEEEtran%20%E2%80%93%20Document%20class%20for%20IEEE,Sources) style:
+  - ```julia
+    doc.ieee = true
+    doc.title = T"IEEE \TeX.jl Example"
+    texgenerate(doc)
+    ``` 
+- [Tufte](https://ctan.org/pkg/tufte-latex?lang=en) style:
+  - ```julia
+    doc.tufte = true
+    doc.title = T"Tufte \TeX.jl Example"
+    texgenerate(doc)
+    ``` 
 
 
+*Click to view PDFs*
 
-## Tufte Example
-Extending the same example as above, adding the following Julia code will produce the [`tufte.pdf`](https://github.com/mossr/TeX.jl/blob/master/test/pdf/tufte.pdf) file shown below.
+Default | JMLR
+:---------------:|:----:
+<kbd> <a href="./test/pdf/default.pdf"><img src="./test/svg/default.svg"></a> </kbd> | <kbd> <a href="./test/pdf/jmlr.pdf"><img src="./test/svg/jmlr.svg"></a> </kbd>
 
-```julia
-doc.tufte = true
-doc.jobname = "tufte" # PDF file name
-doc.title = T"Tufte \TeX.jl Example"
-texgenerate(doc)
-```
+IEEE | Tufte 
+:---:|:-----:
+<kbd> <a href="./test/pdf/ieee.pdf"><img src="./test/svg/ieee.svg"></a> </kbd> | <kbd> <a href="./test/pdf/tufte.pdf"><img src="./test/svg/tufte.svg"></a> </kbd>
 
-This runs slower (hence, optional) and uses `lualatex` and `pythontex`.
-The output PDF uses the `algorithm` and `juliaverbatim` environments with a custom `tufte-writeup.cls`.
 
-<kbd>
-<p align="center">
-  <img src="./test/pdf/tufte.svg">
-</p>
-</kbd>
+#### Tufte Style
+The Tufte style will run slower (hence, optional) and uses `lualatex` and `pythontex`.
+The output PDF uses the `algorithm` and `juliaverbatim` environments included in a custom `tufte-writeup.cls`.
 
 
 ## PGFPlots.jl Example
@@ -97,7 +106,9 @@ texgenerate(doc)
 
 <kbd>
 <p align="center">
-  <img src="./test/pdf/pgfplots.svg">
+  <a href="./test/pdf/pgfplots.pdf">
+    <img src="./test/svg/pgfplots.svg">
+  </a>
 </p>
 </kbd>
 
@@ -196,7 +207,9 @@ texgenerate()
 
 <kbd>
 <p align="center">
-  <img src="./test/pdf/ml.svg">
+  <a href="./test/pdf/ml.pdf">
+    <img src="./test/svg/ml.svg">
+  </a>
 </p>
 </kbd>
 

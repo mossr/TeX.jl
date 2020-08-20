@@ -9,6 +9,7 @@ doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
 doc.date = T"\today"
 doc.auto_sections = false # do not create new \sections for @tex'd functions
+doc.build_dir = "output_ml"
 
 @tex begin
     𝕀(b) = b ? 1 : 0 # indicator function
@@ -84,4 +85,4 @@ ax.plots = [plot_01, plot_hinge, plot_logistic]
 addplot!(ax; figure=true, figtype="marginfigure", figure_pos="-6cm",
          caption="\\textit{Logistic loss}.", caption_pos=:above)
 
-texgenerate(; output="output_ml")
+texgenerate()

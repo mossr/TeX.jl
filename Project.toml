@@ -1,7 +1,7 @@
 name = "TeX"
 uuid = "79ba4951-f1d1-4432-a4f0-9b558427b7c8"
 authors = ["Robert Moss <mossr@cs.stanford.edu>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"

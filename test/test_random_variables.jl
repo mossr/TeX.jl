@@ -1,6 +1,7 @@
 using TeX
 
 doc = TeXDocument("random_variables"; tufte=true, title="Random Variables")
+doc.build_dir = "output_random_variables"
 
 @tex doc T"\section{Bernoulli Random Variable}"
 
@@ -89,4 +90,4 @@ properties:\sidenote{A binomial random variable is the sum of Bernoulli random v
 \end{marginfigure}
 """
 
-texgenerate(doc; output="output_binomial")
+texgenerate(doc)

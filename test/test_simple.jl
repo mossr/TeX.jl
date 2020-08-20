@@ -1,11 +1,12 @@
 using TeX
 
-doc = TeXDocument("main")
+doc = TeXDocument("default") # PDF file name
 doc.title = T"Simple \TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
 doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
 doc.date = T"\today"
+doc.build_dir = "output_simple"
 addpackage!(doc, "url")
 
 @tex doc T"In mathematical optimization, statistics, decision theory and machine learning,
@@ -17,8 +18,8 @@ either a loss function or its negative (sometimes called a \textit{reward functi
 or a \textit{utility function}), in which case it is to be maximized.
 
 \begin{equation}
-J(\theta) = \frac{1}{m}\sum_{i=1}^{m}\left[ -y^{(i)} \log(h_{\theta}(x^{(i)})) -
-                (1 - y^{(i)}) \log(1 - h_{\theta}(x^{(i)}))\right]
+    J(\theta) = \frac{1}{m}\sum_{i=1}^{m}\biggl[ -y_i \log(h_{\theta}(x_i)) -
+                    (1 - y_i) \log(1 - h_{\theta}(x_i)) \biggr]
 \end{equation}" ->
 function loss_function(theta, X, y)
     m = length(y) # number of training examples
@@ -29,4 +30,4 @@ function loss_function(theta, X, y)
     return (J, grad)
 end
 
-texgenerate(doc; output="output_simple") # Compile the document to PDF
+texgenerate(doc) # Compile the document to PDF

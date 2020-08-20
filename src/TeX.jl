@@ -21,8 +21,8 @@ export @tex,
        globaldoc,
        add!,
        addpackage!,
-       addpdfplots!,
-       addplot!
+       addplot!,
+       resetstyle!
 
 include("TeXTypes.jl")
 include("sugar.jl")
@@ -40,19 +40,47 @@ function globaldoc(jobname::String="main"; kwargs...)
 end
 
 
-function textranslate!(tex::TeXDocument)
+function textranslate!(tex::TeXDocument; use_separate_files::Bool=false, content::String="")
     if tex.tufte
         tex.documentclass = "tufte-writeup"
+        documentoptions = ""
         local_preamble = ""
-        fontoption = ""
+        length_added_pkgs = 0
+    elseif tex.jmlr
+        tex.documentclass = "article"
+        documentoptions = "[twoside,$(tex.documentfontsizept)pt]"
+        local_preamble = """
+        \\ShortHeadings{$(tex.title)}{$(tex.author)}
+        \\firstpageno{1}
+        """
+        addpackage!(tex, "jmlr2e-writeup")
+        length_added_pkgs = 1
+        if hascode(tex)
+            local_preamble *= lstlisting_preamble()
+            length_added_pkgs += add_lstlisting_packages!(tex)
+        end
+    elseif tex.ieee
+        tex.documentclass = "IEEEtran"
+        documentoptions = "[$(tex.ieee_options)]" # [conference] | [journal] | [technote]
+        local_preamble = "\\IEEEoverridecommandlockouts"
+        length_added_pkgs = 0
+        if hascode(tex)
+            local_preamble *= lstlisting_preamble()
+            length_added_pkgs += add_lstlisting_packages!(tex)
+        end
     else
         tex.documentclass = "article"
         local_preamble = lstlisting_preamble()
         length_added_pkgs = add_lstlisting_packages!(tex)
-        fontoption = "[$(tex.documentfontsizept)pt]"
+        documentoptions = "[$(tex.documentfontsizept)pt]"
     end
 
-    str = string("\\documentclass$fontoption{", tex.documentclass, "}\n")
+    if tex.pgfplots
+        addpdfplots!(tex)
+    end
+
+    str = string("\\documentclass$documentoptions{", tex.documentclass, "}\n")
+
     for p in tex.packages
         op = ""
         if p.option != ""
@@ -61,9 +89,9 @@ function textranslate!(tex::TeXDocument)
         str = string(str, "\\usepackage", op, "{", p.name, "}\n")
     end
 
-    if !tex.tufte
+    if length_added_pkgs > 0
         # Clear added lstlisting packages
-        tex.packages = tex.packages[1:end-length_added_pkgs]
+        tex.packages = tex.packages[length_added_pkgs+1:end]
     end
 
     full_preamble = string(tex.preamble, local_preamble)
@@ -76,7 +104,7 @@ function textranslate!(tex::TeXDocument)
     end
 
     if !isempty(tex.title)
-        titlespace = tex.tufte ? "" : "\\vspace{-2.0cm}"
+        titlespace = (tex.tufte || tex.jmlr || tex.ieee) ? "" : "\\vspace{-2.0cm}"
         str = string(str, "\n\\title{$titlespace$(tex.title)}\n")
     end
     str = string(str, "\\date{$(tex.date)}\n")
@@ -85,6 +113,22 @@ function textranslate!(tex::TeXDocument)
         if tex.tufte
             str = string(str, "\n\\author{\\name $(tex.author) \\email $(tex.email)\\\\\n")
             str = string(str, "        \\addr $(tex.address) \\hfill \\thedate}\n")
+        elseif tex.jmlr
+            str *= """
+            \\makeatletter
+            \\author{\\name $(tex.author) \\email $(tex.email)\\\\
+                     \\addr $(tex.address) \\hfill \\@date}
+            \\makeatother
+            """
+        elseif tex.ieee
+            ieee_date = isempty(tex.date) ? "" : "\\\\ \\@date"
+            str *= """
+            \\makeatletter
+            \\author{\\IEEEauthorblockN{$(tex.author)}\\\\
+            \\IEEEauthorblockA{$(tex.address)\\\\
+            $(tex.email)$ieee_date}}
+            \\makeatother
+            """
         else
             str = string(str, "\n\\author{$(tex.author)")
             if !isempty(tex.address)
@@ -102,8 +146,12 @@ function textranslate!(tex::TeXDocument)
     if !isempty(tex.title)
         str = string(str, "\\maketitle\n")
     end
-    for i in tex.inputs
-        str = string(str, "\\input{", i.name, "}\n")
+    if use_separate_files
+        for i in tex.inputs
+            str = string(str, "\\input{", i.name, "}\n")
+        end
+    else
+        str = string(str, content)
     end
     str = string(str, "\\end{document}")
 
@@ -112,27 +160,41 @@ function textranslate!(tex::TeXDocument)
 end
 
 
-function texwrite(tex::TeXDocument)
+function texwrite(tex::TeXDocument; use_separate_files::Bool=false)
     # writes each input file
+    if !use_separate_files
+        io = IOBuffer()
+    end
+
     for input in tex.inputs
-        file = open(abspath(joinpath(tex.build_dir, input.name * ".tex")), "w")
-        if input.needs_section_name && tex.auto_sections
-            write(file, string("\\section{", texformat(input.name), "}\n"))
+        if use_separate_files
+            io = open(abspath(input.name * ".tex"), "w")
         end
-        write(file, input.body)
+        if input.needs_section_name && tex.auto_sections
+            write(io, string("\\section{", texformat(input.name), "}\n"))
+        end
+        write(io, input.body)
         if !isempty(input.code)
             if tex.tufte
-                write(file, juliaverbatim(input.code))
+                write(io, juliaverbatim(input.code))
             else
-                write(file, lstlisting(input.code))
+                write(io, lstlisting(input.code))
             end
         end
-        close(file)
+        if use_separate_files
+            close(io)
+        end
+    end
+
+    if use_separate_files
+        content = ""
+    else
+        content = String(take!(io))
     end
 
     # writes the main document
     main = open(tex.jobname * ".tex", "w")
-    write(main, textranslate!(tex))
+    write(main, textranslate!(tex; use_separate_files=use_separate_files, content=content))
     close(main)
 end
 
@@ -159,7 +221,7 @@ function texcompile(tex::TeXDocument)
         end
 
         # only run `pythontex` if there's Julia code in the document
-        if any([!isempty(input.code) for input in tex.inputs])
+        if hascode(tex)
             cmd_pythontex = ["pythontex",
                              "output/$(tex.jobname)"]
             @info "Running: $(`$cmd_pythontex`)"
@@ -176,12 +238,16 @@ function texcompile(tex::TeXDocument)
         end
     else
         filename = tex.jobname * ".tex"
-        output_directory = abspath(tex.build_dir)
+        # output_directory = abspath(tex.build_dir)
         cmd = ["pdflatex", "-quiet", abspath(filename)]
-        if tex.build_dir != ""
-            push!(cmd, string("-aux-directory=", output_directory))
-            push!(cmd, string("-output-directory=", output_directory))
-            include_dir = joinpath(dirname(pathof(TeX)), "include")
+        if !isempty(tex.build_dir)
+            for dir in tex.pwds
+                # add all directories where @tex was called in
+                push!(cmd, string("-include-directory=", dir))
+            end
+            # push!(cmd, string("-aux-directory=", output_directory))
+            # push!(cmd, string("-output-directory=", output_directory))
+            include_dir = joinpath(dirname(pathof(TeX)), "..", "include")
             include_dirs = [dirname(abspath(filename)), include_dir]
             map(d->push!(cmd,"-include-directory=$d"), include_dirs)
         end
@@ -204,9 +270,10 @@ function texopen(tex::TeXDocument)
 end
 
 
-function texgenerate(document::TeXDocument; output="output")
-    isdir(output) ? nothing : mkdir(output) # TODO. document.build_dir
-    cd(output) do
+function texgenerate(document::TeXDocument)
+    # isdir(output) ? nothing : mkdir(output) # TODO. document.build_dir
+    mkbuilddir(document)
+    cd(document.build_dir) do
         # writes the LaTeX string and function code to a .tex file
         texwrite(document)
 
@@ -332,7 +399,7 @@ end
 
 function _tex(document::TeXDocument, code::Union{Expr, Nothing};
               file::String="", doc_sym::Symbol=Symbol(), latex::String="",
-              func_name::String="", startline::Int=0)
+              func_name::String="", startline::Int=0, tmodule=nothing)
     if code !== nothing
         func_str = get_source(file, startline)
 
@@ -353,20 +420,30 @@ function _tex(document::TeXDocument, code::Union{Expr, Nothing};
         add!(document, latex, func_name, func_str)
 
         return esc(code) # pass code back to scope of calling module
+        # mkbuilddir(document)
+        # cd(document.build_dir) do # in case function calls write out files (e.g., PGFPlots.Image)
+            # @eval(tmodule, $code) # eval code in the current module
+        # end
     else
         add!(document, latex)
     end
 end
 
 
-function __tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String}, file::String, source_line::Int; doc_sym::Symbol=Symbol())
+function __tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String}, file::String, source_line::Int; doc_sym::Symbol=Symbol(), tmodule=nothing)
+    dir = dirname(file)
+    if !in(dir, doc.pwds)
+        # save working directory where @tex was called
+        push!(doc.pwds, dir)
+    end
+
     if isa(tex_and_or_code, String)
         # LaTeX description only.
-        return _tex(doc, nothing; file=file, latex=tex_and_or_code)
+        return _tex(doc, nothing; file=file, latex=tex_and_or_code, tmodule=tmodule)
     elseif tex_and_or_code.head == :macrocall && tex_and_or_code.args[1] == Symbol("@T_str")
         # LaTeX description only (using T"...")
         latex = @eval($tex_and_or_code)
-        return _tex(doc, nothing; file=file, latex=latex)
+        return _tex(doc, nothing; file=file, latex=latex, tmodule=tmodule)
     elseif tex_and_or_code.head == :(->)
         # Includes LaTeX descriptions.
         desc_block = tex_and_or_code.args[1]
@@ -387,10 +464,10 @@ function __tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String}, file::Str
         if has_function_name
             # Use the function name as the section name
             name_str::String = string(func.args[1].args[1])
-            return _tex(doc, code; file=file, latex=latex, func_name=name_str, startline=startline)
+            return _tex(doc, code; file=file, latex=latex, func_name=name_str, startline=startline, tmodule=tmodule)
         else
             # No function name (i.e. begin blocks, etc)
-            return _tex(doc, code; file=file, latex=latex, startline=startline)
+            return _tex(doc, code; file=file, latex=latex, startline=startline, tmodule=tmodule)
         end
     else
         # Does not include a latex description (i.e. code only)
@@ -404,7 +481,7 @@ function __tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String}, file::Str
         code = tex_and_or_code
         startline = source_line
 
-        return _tex(doc, code; file=file, doc_sym=doc_sym, func_name=name_str, startline=startline)
+        return _tex(doc, code; file=file, doc_sym=doc_sym, func_name=name_str, startline=startline, tmodule=tmodule)
     end
 end
 
@@ -432,7 +509,7 @@ macro tex(doc_sym::Symbol, tex_and_or_code::Union{Expr, String})
     doc::TeXDocument = @eval(__module__, $doc_sym)
     file::String = string(__source__.file)
     source_line::Int = __source__.line
-    return __tex(doc, tex_and_or_code, file, source_line; doc_sym=doc_sym)
+    return __tex(doc, tex_and_or_code, file, source_line; doc_sym=doc_sym, tmodule=__module__)
 end
 
 
@@ -456,7 +533,7 @@ macro tex(tex_and_or_code::Union{Expr, String})
     doc::TeXDocument = WORKINGDOC
     file::String = string(__source__.file)
     source_line::Int = __source__.line
-    return __tex(doc, tex_and_or_code, file, source_line)
+    return __tex(doc, tex_and_or_code, file, source_line, tmodule=__module__)
 end
 
 

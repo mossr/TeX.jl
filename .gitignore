@@ -1,6 +1,7 @@
 *.aux
 *.log
 *.pdf
+tmp_*
 
 output/
 output_*

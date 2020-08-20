@@ -33,7 +33,7 @@ end
     preamble::String = ""
     commands::Array{TeXCommand} = []
     inputs::Array{TeXSection} = []
-    build_dir::String = joinpath(".", "")
+    build_dir::String = joinpath(".", "output")
     title::String = ""
     author::String = ""
     email::String = ""
@@ -41,8 +41,13 @@ end
     date::String = ""
     open::Bool = true # open document after compilation
     tufte::Bool = false # use Tufte style (requires `lualatex` and `pdflatex`)
+    jmlr::Bool = false # use JMLR style (http://www.jmlr.org/format)
+    ieee::Bool = false # use IEEEtran style (https://ctan.org/tex-archive/macros/latex/contrib/IEEEtran/?lang=en)
+    ieee_options::String = "conference" # conference, journal, or technote
     auto_sections::Bool = true # automatically create \sections using function names
     remove_begin::Bool = true # remove begin/end block (for multi-lines of non-function code)
+    pgfplots::Bool = false # use PGFPlots.jl (loads preamble at compile time if true)
+    pwds::Vector{String} = [] # directories that @tex were called in (to add to --include-directory)
 end
 
 function TeXDocument(jobname::String; kwargs...)
@@ -72,3 +77,9 @@ function add_lstlisting_packages!(doc::TeXDocument)
     map(pkg->pushfirst!(doc.packages, pkg), reverse(packages)) # prepend
     return length(packages)
 end
+
+hascode(doc::TeXDocument) = any([!isempty(input.code) for input in doc.inputs])
+
+resetstyle!(doc::TeXDocument) = doc.tufte = doc.jmlr = doc.ieee = false
+
+mkbuilddir(doc::TeXDocument) = isdir(doc.build_dir) ? nothing : mkdir(doc.build_dir)

@@ -3,6 +3,7 @@ using TeX
 doc = globaldoc() # we are using the global document internal to TeX
 doc.jobname = "multiline"
 doc.title = "Multiline Debugging"
+doc.build_dir = "output_$(doc.jobname)"
 addpackage!("url")
 
 sigmoid(t) = 1 / (1 + exp(-t)) # not part of Tex.
@@ -32,4 +33,4 @@ g(x,
     c
 
 
-texgenerate(; output="output_$(doc.jobname)")
+texgenerate()

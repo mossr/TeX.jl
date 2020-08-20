@@ -40,6 +40,5 @@ function addplot!(doc::TeXDocument, p::PGFPlotType;
     end
 
     _tex(doc, nothing; latex=tikz)
-
     return tikz
 end

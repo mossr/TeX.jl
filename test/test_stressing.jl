@@ -10,6 +10,7 @@ doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
 doc.date = T"\today"
+doc.build_dir = "output_$(doc.jobname)"
 
 
 @tex doc T"""
@@ -30,17 +31,18 @@ end
 GDOC = globaldoc()
 GDOC.title = "Global Document"
 GDOC.jobname = "stressing_global"
+GDOC.build_dir = "output_$(doc.jobname)_global"
 @tex T"Example without doc." ->
 function example_no_doc(inputs)
     # ...
 end
 
 
-@tex doc f(inputs) = missing
+@tex doc F(inputs) = missing
 
 
 # globaldoc()
-@tex g(inputs) = nothing
+@tex G(inputs) = nothing
 
 
 @tex doc function example_no_latex_inline(inputs)
@@ -48,5 +50,6 @@ end
 end
 
 
-texgenerate(doc; output="output_$(doc.jobname)")
-texgenerate(; output="output_$(doc.jobname)_global")
+texgenerate(doc)
+
+texgenerate()

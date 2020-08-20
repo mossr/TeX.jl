@@ -6,6 +6,7 @@ doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
 doc.date = T"\today"
+doc.build_dir = "output_$(doc.jobname)"
 addpackage!(doc, "url")
 
 @tex doc T"In mathematical optimization, statistics, decision theory and machine learning,
@@ -42,4 +43,4 @@ function shown in the first figure and defined by the formula.\footnote{\url{htt
 sigmoid(t) = 1 / (1 + exp(-t))
 
 
-texgenerate(doc; output="output_$(doc.jobname)") # Compile the document to PDF
+texgenerate(doc) # Compile the document to PDF

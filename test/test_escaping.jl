@@ -1,6 +1,7 @@
 using TeX
 
-globaldoc("escaping"; title="Escaping Example")
+doc = globaldoc("escaping"; title="Escaping Example")
+doc.build_dir = "output_escaping"
 @tex """
 You don't have to use \\texttt{T"..."}, but need to manually escape \\verb+'\\'+ and \\verb+'\$'+.
 
@@ -9,4 +10,4 @@ You don't have to use \\texttt{T"..."}, but need to manually escape \\verb+'\\'+
 \\end{equation}
 """
 
-texgenerate(output="output_escaping")
+texgenerate()

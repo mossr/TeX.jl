@@ -8,6 +8,7 @@ doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
 doc.date = T"\today"
+doc.build_dir = "output_$(doc.jobname)"
 addpackage!("url")
 
 @tex T"In mathematical optimization, statistics, decision theory and machine learning,
@@ -173,26 +174,12 @@ end
 
 
 @tex T"Here's a one-liner:" ->
-f(x,y,c=10) = 2x^2 + 5y^3 + c
+F(x,y,c=10) = 2x^2 + 5y^3 + c
 
 
 @tex T"Here's a two-liner:" ->
-g(x,y,c=10) =
+G(x,y,c=10) =
     2x^2 + 5y^3 + c
 
 
-
-
-function run_tex_test()
-    println()
-    @info "Running @tex test... "
-    try
-        texgenerate(; output="output_$(doc.jobname)")
-        printstyled("[ Done!\n", bold = true, color = :green)
-    catch e
-        printstyled("[ Failed!\n", bold = true, color = :red)
-        error(e)
-    end
-end
-
-run_tex_test()
+texgenerate()
