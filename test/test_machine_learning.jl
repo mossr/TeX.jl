@@ -47,9 +47,8 @@ addplot!(ax; figure=true, figtype="marginfigure", figure_pos="-6cm",
 @tex T"""\section{Hinge Loss (SVMs)}
 Hinge loss upper bounds $\ZeroOneLoss$ and has a non-trivial gradient.
 The intuition is we try to increase the margin if it is less than $1$.
-To fix this problem, we can use the \textit{hinge loss}, which is an upper bound
-on the zero-one loss. Minimizing upper bounds are a general idea; the hope is
-thatpushing down the upper bound leads to pushing down the actual function.
+Minimizing upper bounds are a general idea; the hope is that pushing
+down the upper bound leads to pushing down the actual function.
 \[
     \HingeLoss(x, y, \w) = \max\{1 - (\w \cdot \phi(x)) y, 0 \}
 \]
@@ -85,4 +84,5 @@ ax.plots = [plot_01, plot_hinge, plot_logistic]
 addplot!(ax; figure=true, figtype="marginfigure", figure_pos="-6cm",
          caption="\\textit{Logistic loss}.", caption_pos=:above)
 
+# note, content from CS221 at Stanford
 texgenerate()
