@@ -48,6 +48,7 @@ end
     remove_begin::Bool = true # remove begin/end block (for multi-lines of non-function code)
     pgfplots::Bool = false # use PGFPlots.jl (loads preamble at compile time if true)
     pwds::Vector{String} = [] # directories that @tex were called in (to add to --include-directory)
+    noeval::Bool = false # do not execute code block (for invalid syntax blocks)
 end
 
 function TeXDocument(jobname::String; kwargs...)
@@ -83,3 +84,16 @@ hascode(doc::TeXDocument) = any([!isempty(input.code) for input in doc.inputs])
 resetstyle!(doc::TeXDocument) = doc.tufte = doc.jmlr = doc.ieee = false
 
 mkbuilddir(doc::TeXDocument) = isdir(doc.build_dir) ? nothing : mkdir(doc.build_dir)
+
+addkeywords!(doc::TeXDocument, keyword::String; kwargs...) = addkeywords!(doc, [keyword]; kwargs...)
+function addkeywords!(doc::TeXDocument, keywords::Vector{String}; num::Int=2)
+    morekeywords = join(keywords, ",")
+    doc.preamble *= """
+    \\lstset{
+        morekeywords=[$num]{$morekeywords}
+    }
+    """
+end
+
+addkeywords!(keyword::String; kwargs...) = addkeywords!(WORKINGDOC, keyword; kwargs...)
+addkeywords!(keywords::Vector{String}; kwargs...) = addkeywords!(WORKINGDOC, keywords; kwargs...)

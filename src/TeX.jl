@@ -22,7 +22,8 @@ export @tex,
        add!,
        addpackage!,
        addplot!,
-       resetstyle!
+       resetstyle!,
+       addkeywords!
 
 include("TeXTypes.jl")
 include("sugar.jl")
@@ -94,7 +95,8 @@ function textranslate!(tex::TeXDocument; use_separate_files::Bool=false, content
         tex.packages = tex.packages[length_added_pkgs+1:end]
     end
 
-    full_preamble = string(tex.preamble, local_preamble)
+    # our preamble first, then yours.
+    full_preamble = string(local_preamble, tex.preamble)
     if length(full_preamble) > 0
         str = string(str, full_preamble, "\n")
     end
@@ -419,7 +421,9 @@ function _tex(document::TeXDocument, code::Union{Expr, Nothing};
 
         add!(document, latex, func_name, func_str)
 
-        return esc(code) # pass code back to scope of calling module
+        if !document.noeval
+            return esc(code) # pass code back to scope of calling module
+        end
         # mkbuilddir(document)
         # cd(document.build_dir) do # in case function calls write out files (e.g., PGFPlots.Image)
             # @eval(tmodule, $code) # eval code in the current module
