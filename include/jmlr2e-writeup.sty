@@ -212,7 +212,7 @@
 \def\maketitle{\par
  \begingroup
    \def\thefootnote{\fnsymbol{footnote}}
-   \def\@makefnmark{\hbox to 0pt{$^{\@thefnmark}$\hss}}
+   \def\@makefnmark{\hbox to -1pt{$^{\@thefnmark}$\hss}} % Moss. Fixed white strip on "thanks" asterisk (0pt to -1pt)
    \@maketitle \@thanks
  \endgroup
 \setcounter{footnote}{0}

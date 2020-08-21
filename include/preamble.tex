@@ -1,0 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Custom commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Custom no-mark footnote
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{\kern-3.8ex\colorbox{white}{#1}}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}

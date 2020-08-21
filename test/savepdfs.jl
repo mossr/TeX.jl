@@ -12,6 +12,9 @@ files2save = ["output_simple"=>"default",
               "output_pgfplots_full"=>"pgfplots_full",
               "output_random_variables"=>"random_variables",
               "output_ml"=>"ml",
+              "output_quadratic"=>"quadratic",
+              "output_latexify"=>"latexify",
+              "output_latexify_cases"=>"latexify_cases",
              ]
 
 cd(testdir) do

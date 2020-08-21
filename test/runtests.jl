@@ -14,6 +14,10 @@ testfiles = ["test_simple.jl",
              "test_escaping.jl",
              "test_random_variables.jl",
              "test_machine_learning.jl",
+             "test_quadratic.jl",
+             "test_latexify.jl",
+             "test_latexify_cases.jl",
+             "test_noeval.jl",
             ]
 
 testdir = joinpath(dirname(@__DIR__), "test")

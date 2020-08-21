@@ -25,7 +25,7 @@ function loss_function(theta, X, y)
     m = length(y) # number of training examples
     grad = zeros(size(theta))
     h = sigmoid(X * theta)
-    J = 1/m * sum((-y'*log(h))-(1 .- y)'*log(1 .- h))
+    J = 1/m*sum(-y'*log(h)-(1 .- y)'*log(1 .- h))
     grad = 1/m*(X'*(h-y))
     return (J, grad)
 end

@@ -26,14 +26,12 @@ J(\theta) = \frac{1}{m}\sum_{i=1}^{m}\left[ -y^{(i)} \log(h_{\theta}(x^{(i)})) -
 In statistics, typically a loss function is used for parameter estimation, and the event in question is some function of the
 difference between estimated and true values for an instance of data. The concept, as old as Laplace, was reintroduced in
 statistics by Abraham Wald in the middle of the 20th Century. In the context of economics, for example, this is usually
-economic cost or regret. In classification, it is the penalty for an incorrect classification of an example. In actuarial
-science, it is used in an insurance context to model benefits paid over premiums, particularly since the works of
-Harald Cramér in the 1920s. In optimal control the loss is the penalty for failing to achieve a desired value." ->
+economic cost or regret. In classification, it is the penalty for an incorrect classification of an example." ->
 function loss_function(theta, X, y)
     m = length(y) # number of training examples
     grad = zeros(size(theta))
     h = sigmoid(X * theta)
-    J = 1/m * sum((-y'*log(h))-(1 .- y)'*log(1 .- h))
+    J = 1/m*sum(-y'*log(h)-(1 .- y)'*log(1 .- h))
     grad = 1/m*(X'*(h-y))
     return (J, grad)
 end
@@ -98,13 +96,13 @@ function conformal_gravity(Rkpc::Float64)
     Rkm = kpc_to_km(Rkpc)
     v_rot = Array(Any, R_size)
 
-    mod = cm_to_kpc(1)
-    norm = kpc_to_km(1)
-    cMod = km_to_cm(c)*mod
-    BMod = km_to_cm(B)*mod
+    md = cm_to_kpc(1)
+    nrm = kpc_to_km(1)
+    cMod = km_to_cm(c)*md
+    BMod = km_to_cm(B)*md
 
-    m = (3.06*float32(10)^-30)/mod
-    g = (5.42*float32(10)^-41)/mod
+    m = (3.06*float32(10)^-30)/md
+    g = (5.42*float32(10)^-41)/md
     k = (2*9*float32(10)^-11)
 
     R0kpc = km_to_kpc(R0)
@@ -116,22 +114,22 @@ function conformal_gravity(Rkpc::Float64)
         besx2 = Xkpc/(2*R0kpc)
         besx8 = Xkpc/(8*R0kpc)
 
-        veln = norm^2*((BMod*cMod^2*Xkpc^2)/(2*R0kpc^3)) *
+        veln = nrm^2*((BMod*cMod^2*Xkpc^2)/(2*R0kpc^3)) *
             (besseli(0,besx2)*besselk(0,besx2) - besseli(1,besx2) *
              besselk(1,besx2))
 
-        velm = norm^2*((m*cMod^2*Xkpc)/2)
-        velb = norm^2*(((g*cMod^2*Xkpc^2)/(2*R0kpc)) *
+        velm = nrm^2*((m*cMod^2*Xkpc)/2)
+        velb = nrm^2*(((g*cMod^2*Xkpc^2)/(2*R0kpc)) *
             (besseli(1,besx2)*besselk(1,besx2)))
-        velk = norm^2*((k*cMod^2*Xkpc^2)/2)
+        velk = nrm^2*((k*cMod^2*Xkpc^2)/2)
 
-        veln_gas = norm^2*((N_g*BMod*cMod^2*Xkpc^2)/(2*64*R0kpc^3)) *
-            (besseli(0,besx8)*besselk(0,besx8)-besseli(1,besx8) *
+        veln_gas = nrm^2*((N_g*BMod*cMod^2*Xkpc^2)/(2*64*R0kpc^3))*
+            (besseli(0,besx8)*besselk(0,besx8)-besseli(1,besx8)*
              besselk(1,besx8))
-        velb_gas = norm^2*((N_g*g*cMod^2*Xkpc^2)/(8*R0kpc)) *
+        velb_gas = nrm^2*((N_g*g*cMod^2*Xkpc^2)/(8*R0kpc))*
             (besseli(1,besx8)*besselk(1,besx8))
 
-        v_rot[i] = sqrt((N*(veln + velb)) + velm - velk + veln_gas +
+        v_rot[i] = sqrt((N*(veln+velb)) + velm - velk + veln_gas +
             velb_gas + (v_bulge_n_inner(Xkpc, bulge_b, bulge_t) +
             v_bulge_b_inner(Xkpc, bulge_b, bulge_t)))
     end

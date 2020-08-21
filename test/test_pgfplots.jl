@@ -1,3 +1,4 @@
+using Revise
 using TeX
 
 doc = TeXDocument("pgfplots"; title=T"\TeX.jl Example using PGFPlots.jl")

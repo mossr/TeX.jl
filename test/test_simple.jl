@@ -1,7 +1,7 @@
 using TeX
 
 doc = TeXDocument("default") # PDF file name
-doc.title = T"Simple \TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings
+doc.title = T"Simple \TeX.jl Example: \texttt{@tex}" # Use T"..." to escape TeX strings (raw"..." works too)
 doc.author = "Robert Moss"
 doc.address = "Stanford University, Stanford, CA 94305"
 doc.email = "mossr@cs.stanford.edu"
@@ -25,9 +25,10 @@ function loss_function(theta, X, y)
     m = length(y) # number of training examples
     grad = zeros(size(theta))
     h = sigmoid(X * theta)
-    J = 1/m * sum((-y'*log(h))-(1 .- y)'*log(1 .- h))
+    J = 1/m*sum(-y'*log(h)-(1 .- y)'*log(1 .- h))
     grad = 1/m*(X'*(h-y))
     return (J, grad)
 end
+
 
 texgenerate(doc) # Compile the document to PDF

@@ -1,4 +1,3 @@
-using Revise
 using TeX
 using ColorSchemes
 using Random
@@ -32,7 +31,7 @@ end
 
 @tex """
 \\section{Histograms}
-Histograms using normally distributed data from \$\\mathcal{N}(0, 1)\$.
+Histograms using normally distributed data: \$\\mathcal{N}(0, 1)\$.
 """ ->
 begin
     d = randn(100)
@@ -48,11 +47,12 @@ Image plots create a PNG bitmap and are useful for visualizing 2D functions.
 """ ->
 begin
     using ColorSchemes
-    vir = ColorMaps.RGBArrayMap(ColorSchemes.viridis,
-                                interpolation_levels=500,
-                                invert=true)
-    f = (x,y)->x*exp(-x^2-y^2)
-    img = Plots.Image(f, (-2,2), (-2,2), colormap=vir)
+    import PGFPlots.ColorMaps: RGBArrayMap
+    c = RGBArrayMap(ColorSchemes.viridis,
+                    interpolation_levels=500,
+                    invert=true)
+    h = (x,y)->x*exp(-x^2-y^2)
+    img = Plots.Image(h, (-2,2), (-2,2), colormap=c)
     addplot!(doc, img)
 end
 
@@ -63,8 +63,9 @@ These are often used in radio-frequency engineering.
 """ ->
 begin
     sa = SmithAxis([
-            PGFPlots.SmithCircle(1, 1, 2, style="blue"),
-            PGFPlots.SmithCircle(0.5, -1, 1, style="red")])
+        PGFPlots.SmithCircle(1, 1, 2, style="blue"),
+        PGFPlots.SmithCircle(0.5, -1, 1, style="red")
+    ])
     addplot!(doc, sa)
 end
 

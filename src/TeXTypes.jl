@@ -52,13 +52,16 @@ end
 end
 
 function TeXDocument(jobname::String; kwargs...)
-    tex = TeXDocument(; kwargs...)
-    tex.jobname = jobname
-    return tex
+    doc = TeXDocument(; kwargs...)
+    doc.jobname = jobname
+    return doc
 end
 
+core_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "preamble.tex"), String)
+mathematics_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "mathematics.tex"), String)
 lstlisting_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "julia_preamble.tex"), String)
 tufte_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "julia_preamble.tex"), String)
+arrows_preamble() = read(joinpath(dirname(pathof(TeX)), "..", "include", "arrows_and_braces.tex"), String)
 
 addpackage!(doc::TeXDocument, package::TeXPackage) = push!(doc.packages, package)
 addpackage!(doc::TeXDocument, package::String) = push!(doc.packages, TeXPackage(package))
