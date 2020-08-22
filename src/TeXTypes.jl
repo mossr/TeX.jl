@@ -49,6 +49,7 @@ end
     pgfplots::Bool = false # use PGFPlots.jl (loads preamble at compile time if true)
     pwds::Vector{String} = [] # directories that @tex were called in (to add to --include-directory)
     noeval::Bool = false # do not execute code block (for invalid syntax blocks)
+    title_case_sections::Bool = true # automatically title case function names for sections
 end
 
 function TeXDocument(jobname::String; kwargs...)

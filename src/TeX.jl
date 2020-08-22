@@ -191,7 +191,10 @@ function texwrite(doc::TeXDocument; use_separate_files::Bool=false)
             io = open(abspath(input.name * ".tex"), "w")
         end
         if input.needs_section_name && doc.auto_sections
-            write(io, string("\\section{", texformat(input.name), "}\n"))
+            already_has_section::Bool = match(r"^(\s)*\\section{"s, input.body) != nothing
+            if !already_has_section
+                write(io, string("\\section{", texformat(input.name, use_title_case=doc.title_case_sections), "}\n"))
+            end
         end
         write(io, input.body)
         if !isempty(input.code)
@@ -380,8 +383,8 @@ macro attachfile!(doc_sym::Symbol)
     attachfile!(doc, string(__source__.file))
 end
 
-
-function attachfile!(doc::TeXDocument, filename="")
+attachfile!(filename::String) = attachfile!(check_globaldoc(), filename)
+function attachfile!(doc::TeXDocument, filename)
     if !any([pkg.name == "attachfile" for pkg in doc.packages])
         addpackage!(doc, "colorlinks=false,allbordercolors={1 1 1}", "attachfile")
     end
@@ -507,7 +510,14 @@ function _tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String};
         has_function_name::Bool = func.head != :call
         if has_function_name
             # Use the function name as the section name
-            name_str::String = string(func.args[1].args[1])
+            name_str = ""
+            try
+                if func.args[1].head != :tuple
+                    name_str = string(func.args[1].args[1])
+                end
+            catch
+                # default to no function name.
+            end
             return __tex(doc, code; file=file, latex=latex, func_name=name_str, startline=startline, _module=_module, noeval=noeval)
         else
             # No function name (i.e. begin blocks, etc)
