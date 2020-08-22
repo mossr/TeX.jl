@@ -292,12 +292,6 @@ _These steps are only required if you set `doc.tufte=true`._
 This requires `lualatex` and `pythontex`.
 You can download the latest version of pythontex from https://github.com/gpoore/pythontex.
 
-Initialize and update the submodules:
-```
-git submodule init
-git submodule update
-```
-
 Compile the style:
 ```
 cd style
