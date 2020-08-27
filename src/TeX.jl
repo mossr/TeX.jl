@@ -191,9 +191,13 @@ function texwrite(doc::TeXDocument; use_separate_files::Bool=false)
             io = open(abspath(input.name * ".tex"), "w")
         end
         if input.needs_section_name && doc.auto_sections
-            already_has_section::Bool = match(r"^(\s)*\\section{"s, input.body) != nothing
+            section_string = "\\section"
+            if doc.use_subsections
+                section_string = "\\subsection"
+            end
+            already_has_section::Bool = match(r"^(\s)*\\section{"s, input.body) != nothing # note, not using `section_string`, only search for \section
             if !already_has_section
-                write(io, string("\\section{", texformat(input.name, use_title_case=doc.title_case_sections), "}\n"))
+                write(io, string("$section_string{", texformat(input.name, use_title_case=doc.title_case_sections), "}\n"))
             end
         end
         write(io, input.body)
@@ -506,8 +510,13 @@ function _tex(doc::TeXDocument, tex_and_or_code::Union{Expr, String};
         
         startline::Int = find_first_line(code) + 1
 
-        func::Expr = code.args[end]
-        has_function_name::Bool = func.head != :call
+        if code.args[end] isa Symbol
+            has_function_name = false
+        else
+            func::Expr = code.args[end]
+            has_function_name = func.head != :call
+        end
+
         if has_function_name
             # Use the function name as the section name
             name_str = ""
